@@ -1,0 +1,120 @@
+@import 'tailwindcss';
+
+@theme {
+    --color-agpim-blue: #1247a6;
+    --color-agpim-navy: #0f172a;
+    --color-agpim-gold: #f1c24c;
+}
+
+[x-cloak] { display: none !important; }
+
+@layer base {
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(18, 71, 166, 0.35), transparent 35%),
+            radial-gradient(circle at top right, rgba(241, 194, 76, 0.12), transparent 28%),
+            #020617;
+    }
+
+    input,
+    select,
+    textarea {
+        @apply w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-300/40;
+    }
+}
+
+@layer components {
+    .card-panel {
+        @apply rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-slate-950/30 backdrop-blur;
+    }
+
+    .metric-card {
+        @apply rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-5 text-sm text-slate-300 shadow-lg shadow-slate-950/20;
+    }
+
+    .metric-card strong {
+        @apply mt-3 block text-3xl font-semibold text-white;
+    }
+
+    .badge-gold {
+        @apply inline-flex rounded-full border border-amber-300/30 bg-amber-400/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-amber-100;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-full bg-sky-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/25 transition hover:bg-sky-400;
+    }
+
+    .btn-secondary,
+    .nav-pill,
+    .tab-chip {
+        @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-sky-300/30 hover:text-white;
+    }
+
+    .tab-chip-active {
+        @apply border-sky-300/40 bg-sky-500/15 text-white;
+    }
+
+    .section-label {
+        @apply text-sm font-semibold uppercase tracking-[0.25em] text-sky-200/80;
+    }
+
+    .feature-card {
+        @apply rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-5;
+    }
+
+    .feature-card h3 {
+        @apply text-lg font-semibold text-white;
+    }
+
+    .feature-card p {
+        @apply mt-2 text-sm leading-7 text-slate-300;
+    }
+
+    .timeline-item {
+        @apply grid grid-cols-[64px_16px_1fr] items-start gap-4;
+    }
+
+    .timeline-hour {
+        @apply pt-2 text-sm font-semibold text-sky-100;
+    }
+
+    .timeline-dot {
+        @apply mt-3 h-4 w-4 rounded-full bg-sky-400 shadow-lg shadow-sky-500/40;
+    }
+
+    .timeline-card,
+    .detail-card,
+    .empty-state,
+    .form-field {
+        @apply rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-4;
+    }
+
+    .detail-card span,
+    .form-field span {
+        @apply block text-xs uppercase tracking-[0.2em] text-slate-400;
+    }
+
+    .detail-card strong {
+        @apply mt-2 block text-sm font-medium text-white;
+    }
+
+    .priority-chip {
+        @apply inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em];
+    }
+
+    .priority-tinggi {
+        @apply border border-rose-300/20 bg-rose-500/15 text-rose-100;
+    }
+
+    .priority-sedang {
+        @apply border border-amber-300/20 bg-amber-500/15 text-amber-100;
+    }
+
+    .priority-biasa {
+        @apply border border-sky-300/20 bg-sky-500/15 text-sky-100;
+    }
+
+    .empty-state {
+        @apply text-sm text-slate-400;
+    }
+}
