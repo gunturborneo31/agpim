@@ -14,6 +14,5 @@ class AgendaSubmitted
     public function __construct(
         public Agenda $agenda,
         public ?User $actor = null,
-    ) {
-    }
+    ) {}
 }

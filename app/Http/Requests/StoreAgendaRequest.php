@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Agenda;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +10,7 @@ class StoreAgendaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('create', \App\Models\Agenda::class) ?? false;
+        return $this->user()?->can('create', Agenda::class) ?? false;
     }
 
     public function rules(): array
