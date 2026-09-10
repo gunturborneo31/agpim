@@ -15,6 +15,7 @@ class AgendaDocument extends Model
         'uploaded_by',
         'category',
         'title',
+        'source_from',
         'description',
         'file_path',
         'mime_type',

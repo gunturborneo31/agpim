@@ -13,6 +13,7 @@ class OpdSeeder extends Seeder
             ['code' => 'BAPPEDA', 'name' => 'Badan Perencanaan Pembangunan Daerah', 'alias' => 'Bappeda'],
             ['code' => 'PUPR', 'name' => 'Dinas Pekerjaan Umum dan Penataan Ruang', 'alias' => 'PUPR'],
             ['code' => 'DISKOMINFO', 'name' => 'Dinas Komunikasi dan Informatika', 'alias' => 'Diskominfo'],
+            ['code' => 'DISDIK', 'name' => 'Dinas Pendidikan dan Kebudayaan', 'alias' => 'Disdikbud'],
             ['code' => 'SETDA', 'name' => 'Sekretariat Daerah', 'alias' => 'Setda'],
         ];
 

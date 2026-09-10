@@ -37,4 +37,12 @@ class UserFactory extends Factory
             'opd_id' => $opdId,
         ]);
     }
+
+    public function verifikator(?int $opdId = null): static
+    {
+        return $this->state(fn () => [
+            'role' => UserRole::Verifikator,
+            'opd_id' => $opdId,
+        ]);
+    }
 }

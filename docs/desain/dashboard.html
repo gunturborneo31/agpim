@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AGPIM Mahakam Ulu - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#d13035",
+                        "on-primary-fixed": "#00174b",
+                        "on-tertiary-fixed-variant": "#930015",
+                        "surface-container-low": "#f3f3f6",
+                        "on-tertiary-fixed": "#410004",
+                        "primary": "#004cca",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f9f9fc",
+                        "surface-variant": "#e2e2e5",
+                        "on-secondary-fixed": "#00201d",
+                        "surface-container-highest": "#e2e2e5",
+                        "primary-fixed": "#dbe1ff",
+                        "on-surface": "#1a1c1e",
+                        "error-container": "#ffdad6",
+                        "outline": "#737687",
+                        "tertiary-fixed-dim": "#ffb3ae",
+                        "secondary-fixed": "#57fae9",
+                        "surface-tint": "#0053da",
+                        "surface-container": "#eeeef0",
+                        "secondary": "#006a62",
+                        "on-tertiary-container": "#fff1ef",
+                        "on-surface-variant": "#424656",
+                        "on-primary-container": "#f3f3ff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#0062ff",
+                        "surface-dim": "#dadadc",
+                        "surface": "#f9f9fc",
+                        "on-background": "#1a1c1e",
+                        "on-secondary-container": "#007168",
+                        "inverse-surface": "#2f3133",
+                        "on-secondary-fixed-variant": "#005049",
+                        "outline-variant": "#c2c6d9",
+                        "inverse-on-surface": "#f0f0f3",
+                        "background": "#f9f9fc",
+                        "inverse-primary": "#b4c5ff",
+                        "surface-container-high": "#e8e8ea",
+                        "secondary-container": "#57fae9",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "tertiary-fixed": "#ffdad7",
+                        "tertiary": "#ad1220",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#2addcd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "1rem",
+                        "gutter": "1.5rem",
+                        "card-padding": "1.5rem",
+                        "container-margin": "2rem"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .bento-card {
+            background: #ffffff;
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .bento-card:hover {
+            box-shadow: 0 8px 24px 0 rgba(0, 76, 202, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .featured-gradient {
+            background: linear-gradient(135deg, #0062ff 0%, #004cca 100%);
+        }
+
+        .app-bottom-nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 60;
+            background: rgba(249, 249, 252, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid #e2e2e5;
+        }
+
+        .app-bottom-nav-inner {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.65rem 1rem max(0.65rem, env(safe-area-inset-bottom));
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            gap: 0.5rem;
+        }
+
+        .app-bottom-nav-item {
+            border: 0;
+            background: transparent;
+            color: #424656;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            min-width: 64px;
+            padding: 0.25rem 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .app-bottom-nav-item .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .app-bottom-nav-item[data-active="true"] {
+            background: #dbe1ff;
+            color: #003ea8;
+        }
+
+        .app-bottom-nav-item:hover {
+            background: #e8e8ea;
+        }
+
+        .fab-action {
+            z-index: 61;
+        }
+
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="text-on-surface">
+    <!-- Top App Bar -->
+    <header class="glass-header sticky top-0 z-50 shadow-sm">
+        <div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-on-primary-container">
+                    <span class="material-symbols-outlined" data-icon="account_balance">account_balance</span>
+                </div>
+                <div>
+                    <p
+                        class="text-[10px] font-bold tracking-widest text-primary opacity-70 uppercase leading-none mb-1">
+                        PEMKAB MAHULU/p>
+                    <h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">AGPIM</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden md:block text-right">
+                    <p class="font-label-lg text-label-lg text-on-surface">Super Admin</p>
+                    <p class="text-[10px] text-on-surface-variant font-medium">Logged in</p>
+                </div>
+                <div class="w-10 h-10 rounded-full border-2 border-primary-container p-0.5 overflow-hidden">
+                    <img alt="Super Admin" class="w-full h-full object-cover rounded-full"
+                        data-alt="A professional headshot of a government official in a light gray suit, standing against a clean, minimalist executive office background with soft daylighting. The style is modern corporate photography with a warm, optimistic, and trustworthy feel."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_de8BpsT2uIX6bPXhlfnhg32zKM_QBNctHtKbc4dQjByCxhMjom6HC1ODYeuYZlaPcUl_9ysYE_mj439FQLLH-eI_UIZoaMQvBMBplDCKJ9QSWX9yFmj8nLCKXCkqdl-bZ-ZBLvyqqzgJv9RrT7nQU0zuDWCO8dlBFXtt80574hcRe74HVDX4D2dJCEA92ULKui2Hpjyjx8ArFD2fTKb9c5B25u0pl1_pf4IlowOUqe-coTKgytH8DqZysWQBHH2JCUsssDQQtVJc" />
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-6 pb-28 md:pb-28">
+        <!-- Filter Tabs -->
+        <section class="mb-8 overflow-x-auto no-scrollbar">
+            <div class="flex gap-3 min-w-max pb-2">
+                <button
+                    class="bg-primary text-on-primary font-label-lg text-label-lg px-8 py-3 rounded-full shadow-lg shadow-primary/20">Bupati</button>
+                <button
+                    class="bg-surface-container-high text-on-surface-variant font-label-lg text-label-lg px-8 py-3 rounded-full hover:bg-surface-variant transition-colors">Wakil
+                    Bupati</button>
+                <button
+                    class="bg-surface-container-high text-on-surface-variant font-label-lg text-label-lg px-8 py-3 rounded-full hover:bg-surface-variant transition-colors">Sekretaris
+                    Daerah</button>
+            </div>
+        </section>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Main Content Area -->
+            <div class="lg:col-span-8 space-y-8">
+                <!-- Featured Card -->
+                <div
+                    class="featured-gradient rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-primary/20">
+                    <div class="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+                    <div class="absolute right-20 bottom-10 w-32 h-32 bg-primary-container/20 rounded-full blur-2xl">
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span
+                                class="bg-white/20 px-3 py-1 rounded-full text-[12px] font-bold tracking-wide uppercase">Agenda
+                                Berikutnya</span>
+                            <span class="w-2 h-2 bg-secondary-fixed rounded-full animate-pulse"></span>
+                        </div>
+                        <h3 class="font-headline-lg text-headline-lg mb-8 leading-tight">Rapat Infrastruktur Digital
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-white/20">
+                            <div>
+                                <p class="text-white/60 text-[12px] uppercase font-bold tracking-widest mb-1">Jam</p>
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]"
+                                        data-icon="schedule">schedule</span>
+                                    <p class="font-headline-sm text-headline-sm">08:00 - 09:30</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-white/60 text-[12px] uppercase font-bold tracking-widest mb-1">Lokasi</p>
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]"
+                                        data-icon="location_on">location_on</span>
+                                    <p class="font-headline-sm text-headline-sm">Ruang Rapat Bupati</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-white/60 text-[12px] uppercase font-bold tracking-widest mb-1">Countdown
+                                </p>
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]" data-icon="timer">timer</span>
+                                    <p class="font-headline-sm text-headline-sm">6 jam 54 mnt</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Timeline Section -->
+                <section>
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="font-headline-sm text-headline-sm flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary"
+                                data-icon="event_note">event_note</span>
+                            Timeline Hari Ini
+                        </h4>
+                        <span
+                            class="text-on-surface-variant text-label-sm font-label-sm uppercase tracking-widest">Pusat
+                            Dashboard Pimpinan</span>
+                    </div>
+                    <div class="space-y-4">
+                        <!-- Timeline Item 1 -->
+                        <div class="bento-card p-6 rounded-2xl flex items-center gap-6 border-l-4 border-primary">
+                            <div class="hidden sm:block min-w-[80px]">
+                                <p class="font-headline-sm text-headline-sm text-on-surface">08:00</p>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h5 class="font-headline-sm text-headline-sm leading-tight mb-1">Rapat
+                                            Infrastruktur Digital</h5>
+                                        <p
+                                            class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+                                            Ruang Rapat Bupati <span class="mx-1 opacity-40">•</span> Diskominfo
+                                        </p>
+                                    </div>
+                                    <span
+                                        class="bg-tertiary-container/10 text-tertiary text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest self-start sm:self-center">Tinggi</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Timeline Item 2 -->
+                        <div class="bento-card p-6 rounded-2xl flex items-center gap-6 border-l-4 border-secondary">
+                            <div class="hidden sm:block min-w-[80px]">
+                                <p class="font-headline-sm text-headline-sm text-on-surface">10:00</p>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h5 class="font-headline-sm text-headline-sm leading-tight mb-1">Peresmian
+                                            Gedung Pelayanan</h5>
+                                        <p
+                                            class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+                                            Long Bagun <span class="mx-1 opacity-40">•</span> Setda
+                                        </p>
+                                    </div>
+                                    <span
+                                        class="bg-secondary/10 text-secondary text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest self-start sm:self-center">Sedang</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Timeline Item 3 -->
+                        <div class="bento-card p-6 rounded-2xl flex items-center gap-6 border-l-4 border-primary">
+                            <div class="hidden sm:block min-w-[80px]">
+                                <p class="font-headline-sm text-headline-sm text-on-surface">10:30</p>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h5 class="font-headline-sm text-headline-sm leading-tight mb-1">Audiensi DPRD
+                                        </h5>
+                                        <p
+                                            class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+                                            Kantor DPRD <span class="mx-1 opacity-40">•</span> Setda
+                                        </p>
+                                    </div>
+                                    <span
+                                        class="bg-tertiary-container/10 text-tertiary text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest self-start sm:self-center">Tinggi</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- Sidebar Content -->
+            <div class="lg:col-span-4 space-y-8">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bento-card p-5 rounded-2xl">
+                        <div
+                            class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-4">
+                            <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                        </div>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Total Hari Ini</p>
+                        <h4 class="font-headline-lg text-headline-lg text-primary">3</h4>
+                    </div>
+                    <div class="bento-card p-5 rounded-2xl">
+                        <div
+                            class="w-10 h-10 bg-tertiary/10 rounded-xl flex items-center justify-center text-tertiary mb-4">
+                            <span class="material-symbols-outlined" data-icon="priority_high">priority_high</span>
+                        </div>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Prioritas Tinggi</p>
+                        <h4 class="font-headline-lg text-headline-lg text-tertiary">2</h4>
+                    </div>
+                    <div class="bento-card p-5 rounded-2xl">
+                        <div
+                            class="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-600 mb-4">
+                            <span class="material-symbols-outlined" data-icon="pending">pending</span>
+                        </div>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Menunggu</p>
+                        <h4 class="font-headline-lg text-headline-lg text-orange-600">1</h4>
+                    </div>
+                    <div class="bento-card p-5 rounded-2xl">
+                        <div
+                            class="w-10 h-10 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary mb-4">
+                            <span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+                        </div>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Selesai</p>
+                        <h4 class="font-headline-lg text-headline-lg text-secondary">0</h4>
+                    </div>
+                </div>
+                <!-- Action Lists -->
+                <div class="space-y-6">
+                    <!-- Menunggu Keputusan -->
+                    <div class="bg-orange-50/50 rounded-3xl p-6 border border-orange-100">
+                        <h5
+                            class="font-label-lg text-label-lg text-orange-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]"
+                                data-icon="hourglass_empty">hourglass_empty</span>
+                            Menunggu Keputusan
+                        </h5>
+                        <div class="bento-card p-4 rounded-xl border border-orange-100 shadow-none">
+                            <h6 class="font-headline-sm text-headline-sm-mobile text-on-surface mb-1">Peresmian Gedung
+                                Pelayanan</h6>
+                            <p class="text-[12px] text-on-surface-variant">04 Jun 2026 • Long Bagun</p>
+                        </div>
+                    </div>
+                    <!-- Prioritas Tinggi -->
+                    <div class="bg-red-50/50 rounded-3xl p-6 border border-red-100">
+                        <h5
+                            class="font-label-lg text-label-lg text-red-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="bolt">bolt</span>
+                            Prioritas Tinggi
+                        </h5>
+                        <div class="space-y-3">
+                            <div class="bento-card p-4 rounded-xl border border-red-100 shadow-none">
+                                <h6 class="font-headline-sm text-headline-sm-mobile text-on-surface mb-1">Rapat
+                                    Infrastruktur Digital</h6>
+                                <p class="text-[12px] text-on-surface-variant">04 Jun 2026 • 08:00</p>
+                            </div>
+                            <div class="bento-card p-4 rounded-xl border border-red-100 shadow-none">
+                                <h6 class="font-headline-sm text-headline-sm-mobile text-on-surface mb-1">Audiensi DPRD
+                                </h6>
+                                <p class="text-[12px] text-on-surface-variant">04 Jun 2026 • 10:30</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Agenda Bentrok -->
+                    <div class="bg-gray-100/50 rounded-3xl p-6 border border-gray-200">
+                        <h5
+                            class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="warning">warning</span>
+                            Agenda Bentrok
+                        </h5>
+                        <div class="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-dashed border-gray-300">
+                            <h6 class="font-label-lg text-label-lg text-red-600 mb-2">Peresmian ↔ Audiensi DPRD</h6>
+                            <p class="text-[12px] text-on-surface font-medium mb-1">Waktu bentrok: 10:00 - 12:00</p>
+                            <p class="text-[11px] text-on-surface-variant italic leading-relaxed">Pertimbangkan
+                                disposisi ke pejabat lain atau ubah slot agenda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Navigation Bar -->
+    <nav class="app-bottom-nav" aria-label="Menu navigasi bawah">
+        <div class="app-bottom-nav-inner">
+            <button class="app-bottom-nav-item" data-active="true" type="button">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;">home</span>
+                <span class="label">Beranda</span>
+            </button>
+            <button class="app-bottom-nav-item" data-active="false" type="button">
+                <span class="material-symbols-outlined">event</span>
+                <span class="label">Agenda</span>
+            </button>
+            <button class="app-bottom-nav-item" data-active="false" type="button">
+                <span class="material-symbols-outlined">grid_view</span>
+                <span class="label">Dashboard</span>
+            </button>
+            <button class="app-bottom-nav-item" data-active="false" type="button">
+                <span class="material-symbols-outlined">description</span>
+                <span class="label">Pengajuan</span>
+            </button>
+            <button class="app-bottom-nav-item" data-active="false" type="button">
+                <span class="material-symbols-outlined">person</span>
+                <span class="label">User</span>
+            </button>
+        </div>
+    </nav>
+    <!-- Floating Action Button -->
+    <button
+        class="fab-action fixed right-6 bottom-24 md:bottom-24 bg-primary text-on-primary w-14 h-14 rounded-2xl shadow-2xl shadow-primary/40 flex items-center justify-center transition-transform hover:scale-105 active:scale-95">
+        <span class="material-symbols-outlined text-[28px]" data-icon="add">add</span>
+    </button>
+    <script>
+        (() => {
+            const items = document.querySelectorAll(".app-bottom-nav-item");
+            if (!items.length) return;
+
+            items.forEach((item) => {
+                item.addEventListener("click", () => {
+                    items.forEach((entry) => {
+                        entry.dataset.active = "false";
+                        const icon = entry.querySelector(".material-symbols-outlined");
+                        if (icon) {
+                            icon.style.fontVariationSettings = "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+                        }
+                    });
+
+                    item.dataset.active = "true";
+                    const activeIcon = item.querySelector(".material-symbols-outlined");
+                    if (activeIcon) {
+                        activeIcon.style.fontVariationSettings = "'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24";
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+
+</html>

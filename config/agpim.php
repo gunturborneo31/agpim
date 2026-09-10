@@ -16,6 +16,10 @@ return [
         'rejected' => 'Ditolak',
         'completed' => 'Selesai',
     ],
+    'attendance_sources' => [
+        'proposed' => 'Orang yang diajukan OPD',
+        'disposition' => 'Orang hasil disposisi',
+    ],
     'dispositions' => [
         'bupati' => 'Dihadiri Bupati',
         'wakil_bupati' => 'Dihadiri Wakil Bupati',

@@ -17,7 +17,7 @@ class PublicAgendaPageTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('Agenda Publik Internal')
-            ->assertSee('Tanpa dokumen internal');
+            ->assertSee('Ringkasan Pengajuan OPD')
+            ->assertSee('Periode aktif');
     }
 }

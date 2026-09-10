@@ -10,6 +10,7 @@ enum UserRole: string
     case WakilBupati = 'wakil_bupati';
     case Sekda = 'sekda';
     case Opd = 'opd';
+    case Verifikator = 'verifikator';
 
     public function label(): string
     {
@@ -20,6 +21,7 @@ enum UserRole: string
             self::WakilBupati => 'Wakil Bupati',
             self::Sekda => 'Sekretaris Daerah',
             self::Opd => 'OPD',
+            self::Verifikator => 'Verifikator',
         };
     }
 

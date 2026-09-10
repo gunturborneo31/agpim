@@ -2,12 +2,23 @@
   "name": "AGPIM",
   "short_name": "AGPIM",
   "description": "Agenda Pimpinan Kabupaten Mahakam Ulu",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#1247a6",
   "lang": "id-ID",
   "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
     {
       "src": "/favicon.ico",
       "sizes": "48x48",

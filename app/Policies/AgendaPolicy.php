@@ -18,11 +18,21 @@ class AgendaPolicy
         return $user->hasRole(UserRole::SuperAdmin, UserRole::AdminProkopim)
             || $agenda->submitted_by === $user->id
             || ($user->opd_id && $agenda->opd_id === $user->opd_id)
-            || ($agenda->leader_target && $user->hasRole($agenda->leader_target));
+            || ($agenda->leader_target && $user->hasRole($agenda->leader_target))
+            || ($user->hasRole(UserRole::Verifikator) && $agenda->submitter?->hasRole(UserRole::Opd));
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole(UserRole::Opd, UserRole::AdminProkopim, UserRole::SuperAdmin);
+        return $user->hasRole(UserRole::Opd, UserRole::Verifikator);
+    }
+
+    public function update(User $user, Agenda $agenda): bool
+    {
+        if ($agenda->status !== 'submitted') {
+            return false;
+        }
+
+        return $agenda->submitted_by === $user->id;
     }
 }

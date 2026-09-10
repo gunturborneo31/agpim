@@ -21,7 +21,9 @@ class UserSeeder extends Seeder
             ['name' => 'Bupati Mahakam Ulu', 'email' => 'bupati@agpim.test', 'role' => UserRole::Bupati, 'title' => 'Bupati', 'opd_id' => null],
             ['name' => 'Wakil Bupati Mahakam Ulu', 'email' => 'wabup@agpim.test', 'role' => UserRole::WakilBupati, 'title' => 'Wakil Bupati', 'opd_id' => null],
             ['name' => 'Sekretaris Daerah', 'email' => 'sekda@agpim.test', 'role' => UserRole::Sekda, 'title' => 'Sekretaris Daerah', 'opd_id' => $opds['SETDA'] ?? null],
+            ['name' => 'Verifikator AGPIM', 'email' => 'verifikator@agpim.test', 'role' => UserRole::Verifikator, 'title' => 'Verifikator', 'opd_id' => $opds['SETDA'] ?? null],
             ['name' => 'Operator Diskominfo', 'email' => 'opd@agpim.test', 'role' => UserRole::Opd, 'title' => 'Admin OPD', 'opd_id' => $opds['DISKOMINFO'] ?? null],
+            ['name' => 'Dinas Pendidikan dan Kebudayaan', 'email' => 'disdik@simpelsibang.test', 'role' => UserRole::Opd, 'title' => 'Admin OPD', 'opd_id' => $opds['DISDIK'] ?? null],
         ];
 
         foreach ($users as $user) {
