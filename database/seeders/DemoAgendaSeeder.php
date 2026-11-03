@@ -62,7 +62,7 @@ class DemoAgendaSeeder extends Seeder
                 'location' => 'Long Bagun',
                 'description' => 'Peresmian gedung pelayanan publik terpadu.',
                 'priority' => 'sedang',
-                'status' => 'awaiting_disposition',
+                'status' => 'approved',
                 'leader_target' => 'bupati',
                 'person_in_charge' => 'Bagian Umum',
                 'pic_phone' => '081234567891',

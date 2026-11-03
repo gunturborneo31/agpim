@@ -11,7 +11,7 @@
     };
 @endphp
 <div x-data="{ modal: '' }" @keydown.escape.window="modal = ''" class="space-y-4 md:space-y-6">
-<x-ui.panel>
+<x-ui.panel plain>
     <div class="flex flex-wrap items-end justify-between gap-4">
         <x-ui.section-heading eyebrow="Resume" title="Ringkasan Pengajuan OPD" subtitle="Pantau jumlah agenda diajukan, ditolak, dan disetujui per OPD." />
         <div class="flex flex-wrap items-center gap-2">
@@ -42,43 +42,33 @@
         </div>
     </div>
 
-    <div class="mt-5 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 md:mt-6">
-        Periode aktif: {{ $monthLabel }}
-    </div>
+    <p class="mt-5 text-sm text-muted md:mt-6">Periode aktif: <span class="font-medium text-ink">{{ $monthLabel }}</span></p>
 
-    <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5 md:mt-6">
-        <div class="rounded-3xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">Total Semua</p>
-            <p class="mt-2 text-3xl font-bold text-blue-800">{{ $totals['all'] }}</p>
-        </div>
-        <div class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Total Mengajukan</p>
-            <p class="mt-2 text-3xl font-bold text-slate-900">{{ $totals['submitted'] }}</p>
-        </div>
-        <div class="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Disetujui</p>
-            <p class="mt-2 text-3xl font-bold text-emerald-800">{{ $totals['approved'] }}</p>
-        </div>
-        <div class="rounded-3xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">Menunggu Disposisi</p>
-            <p class="mt-2 text-3xl font-bold text-amber-800">{{ $totals['pending'] }}</p>
-        </div>
-        <div class="rounded-3xl border border-rose-200 bg-rose-50 p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">Ditolak</p>
-            <p class="mt-2 text-3xl font-bold text-rose-800">{{ $totals['rejected'] }}</p>
-        </div>
-    </div>
+    <dl class="mt-3 grid grid-cols-2 overflow-hidden rounded-xl border border-line bg-white sm:grid-cols-4">
+        @foreach ([
+            ['Total semua', $totals['all'], 'bg-[#5a7ef1]'],
+            ['Mengajukan', $totals['submitted'], 'bg-slate-400'],
+            ['Disetujui', $totals['approved'], 'bg-[#45ad80]'],
+            ['Ditolak', $totals['rejected'], 'bg-[#e3685a]'],
+        ] as [$label, $value, $dot])
+            <div @class(['border-line p-4', 'soft-blue' => $loop->first, 'border-l' => ! $loop->first, 'border-t sm:border-t-0' => $loop->index >= 2])>
+                <dt class="flex items-center gap-1.5 text-[13px] text-muted">
+                    <span class="h-1.5 w-1.5 rounded-full {{ $dot }}"></span>{{ $label }}
+                </dt>
+                <dd class="mt-1 font-mono text-[1.75rem] font-medium tracking-tight tabular">{{ $value }}</dd>
+            </div>
+        @endforeach
+    </dl>
 
-    <div class="mt-5 overflow-x-auto rounded-[1.75rem] border border-slate-200 bg-white md:mt-6">
+    <div class="mt-5 overflow-x-auto rounded-xl border border-slate-200 bg-white md:mt-6">
         <table class="min-w-full text-sm text-slate-700">
             <thead>
-                <tr class="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-[0.18em] text-slate-500">
+                <tr class="border-b border-slate-200 bg-slate-50 text-left text-xs text-slate-500">
                     <th class="px-4 py-3">OPD</th>
                     <th class="px-4 py-3">Total Semua</th>
                     <th class="px-4 py-3">Sudah Mengajukan</th>
                     <th class="px-4 py-3">Ditolak</th>
                     <th class="px-4 py-3">Disetujui</th>
-                    <th class="px-4 py-3">Menunggu Disposisi</th>
                 </tr>
             </thead>
             <tbody>
@@ -86,34 +76,29 @@
                     <tr class="border-b border-slate-100 align-top last:border-b-0">
                         <td class="px-4 py-4 font-semibold text-slate-900">{{ $row['opd_name'] }}</td>
                         <td class="px-4 py-4">
-                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'all']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'all' ? 'border-slate-800 bg-slate-800 text-white' : 'border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'all']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'all' ? 'border-slate-800 grad-ink text-white' : 'border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                                 {{ $row['all'] }} agenda
                             </a>
                         </td>
                         <td class="px-4 py-4">
-                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'submitted']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'submitted' ? 'border-blue-700 bg-blue-700 text-white' : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
+                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'submitted']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'submitted' ? 'border-blue-700 grad-blue text-white' : 'border-blue-200 soft-blue text-blue-700 hover:soft-blue' }}">
                                 {{ $row['submitted'] }} agenda
                             </a>
                         </td>
                         <td class="px-4 py-4">
-                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'rejected']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'rejected' ? 'border-rose-700 bg-rose-700 text-white' : 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100' }}">
+                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'rejected']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'rejected' ? 'border-rose-700 grad-red text-white' : 'border-rose-200 soft-red text-rose-700 hover:soft-red' }}">
                                 {{ $row['rejected'] }} agenda
                             </a>
                         </td>
                         <td class="px-4 py-4">
-                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'approved']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'approved' ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'approved']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'approved' ? 'border-emerald-700 grad-green text-white' : 'border-emerald-200 soft-green text-emerald-700 hover:soft-green' }}">
                                 {{ $row['approved'] }} agenda
-                            </a>
-                        </td>
-                        <td class="px-4 py-4">
-                            <a href="{{ route('public-agendas.index', ['month' => $month, 'year' => $year, 'opd_id' => $row['opd_id'], 'status' => 'awaiting_disposition']) }}" class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] {{ $selectedOpdId === $row['opd_id'] && $selectedStatus === 'awaiting_disposition' ? 'border-amber-700 bg-amber-700 text-white' : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' }}">
-                                {{ $row['pending'] }} agenda
                             </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">Belum ada data resume OPD pada periode ini.</td>
+                        <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">Belum ada data resume OPD pada periode ini.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -123,7 +108,7 @@
     <div class="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h3 class="text-lg font-bold text-slate-900">Daftar Agenda OPD Terpilih</h3>
-            <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+            <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
                 {{ $selectedOpdName ? $selectedOpdName : 'Belum memilih OPD' }}
             </span>
         </div>
@@ -133,7 +118,7 @@
                 <article class="rounded-2xl border border-slate-200 bg-white p-4">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                            <p class="text-xs uppercase tracking-[0.18em] text-blue-700">{{ $agenda->type->name }}</p>
+                            <p class="text-xs text-blue-700">{{ $agenda->type->name }}</p>
                             <h4 class="mt-2 text-lg font-semibold text-slate-900">{{ $agenda->title }}</h4>
                             <p class="mt-2 text-sm text-slate-500">{{ $agenda->event_date->translatedFormat('d M Y') }} • {{ $agenda->time_range_display }}</p>
                             <p class="mt-1 text-sm text-slate-600">{{ $agenda->location }}</p>
@@ -173,16 +158,6 @@
                     'previewable' => in_array($ext, ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'], true),
                 ];
             }
-
-            foreach ($agenda->documents as $document) {
-                $ext = strtolower(pathinfo($document->file_path, PATHINFO_EXTENSION));
-                $previewItems[] = [
-                    'label' => $document->title ?: ucfirst(str_replace('_', ' ', $document->category)),
-                    'url' => $resolveStorageUrl($document->file_path),
-                    'ext' => $ext,
-                    'previewable' => in_array($ext, ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'], true),
-                ];
-            }
         @endphp
         <div x-cloak x-show="modal === 'detail-{{ $agenda->id }}'" class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/45 p-4" @click.self="modal = ''">
             <div class="card-panel max-h-[90vh] w-full max-w-5xl overflow-y-auto p-5 md:p-7" x-data="{ items: @js($previewItems), selectedIndex: 0 }">
@@ -203,12 +178,12 @@
                 </div>
 
                 <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 md:mt-5">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Deskripsi</p>
+                    <p class="text-xs font-semibold text-slate-500">Deskripsi</p>
                     <p class="mt-2 leading-7">{{ $agenda->description }}</p>
                 </div>
 
                 <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:mt-5">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Preview Dokumen</p>
+                    <p class="text-xs font-semibold text-slate-500">Preview Dokumen</p>
 
                     <template x-if="items.length === 0">
                         <div class="mt-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">Dokumen belum tersedia.</div>
@@ -219,7 +194,7 @@
                             <div class="space-y-2 rounded-2xl border border-slate-200 bg-white p-3">
                                 <template x-for="(item, index) in items" :key="index">
                                     <button type="button" class="w-full rounded-xl border px-3 py-2 text-left text-sm transition"
-                                        :class="selectedIndex === index ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200'"
+                                        :class="selectedIndex === index ? 'border-blue-200 soft-blue text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200'"
                                         @click="selectedIndex = index">
                                         <p class="font-semibold" x-text="item.label"></p>
                                         <p class="mt-1 text-xs text-slate-500" x-text="item.ext ? item.ext.toUpperCase() : 'FILE'"></p>
@@ -234,7 +209,7 @@
 
                                 <template x-if="items[selectedIndex] && items[selectedIndex].previewable && ['jpg','jpeg','png','gif','webp'].includes(items[selectedIndex].ext)">
                                     <div class="flex min-h-[52vh] items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                        <img :src="items[selectedIndex].url" alt="Preview gambar" class="max-h-[48vh] w-auto rounded-lg shadow-sm">
+                                        <img :src="items[selectedIndex].url" alt="Preview gambar" class="max-h-[48vh] w-auto rounded-lg">
                                     </div>
                                 </template>
 

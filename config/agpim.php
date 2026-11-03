@@ -10,10 +10,10 @@ return [
         'draft' => 'Draft',
         'submitted' => 'Diajukan',
         'under_review' => 'Verifikasi Prokopim',
-        'awaiting_disposition' => 'Menunggu Disposisi',
         'approved' => 'Disetujui',
         'needs_revision' => 'Perlu Revisi',
         'rejected' => 'Ditolak',
+        'cancelled' => 'Dibatalkan',
         'completed' => 'Selesai',
     ],
     'attendance_sources' => [
@@ -26,6 +26,7 @@ return [
         'sekda' => 'Dihadiri Sekda',
         'other_official' => 'Dihadiri Pejabat Lain',
         'rejected' => 'Ditolak',
+        'cancelled' => 'Dibatalkan',
     ],
     'quick_tabs' => [
         'Hari Ini',

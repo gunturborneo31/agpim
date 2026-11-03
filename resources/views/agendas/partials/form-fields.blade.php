@@ -6,7 +6,6 @@
 
     $invitationPath = $agendaItem?->invitation_letter_path;
     $speechPath = $agendaItem?->speech_draft_path;
-    $visualContentSelection = array_filter((array) $currentValue('visual_content', $agendaItem?->visual_content ?? []));
 @endphp
 
 <input type="hidden" name="modal" value="{{ $modalKey }}">
@@ -74,6 +73,7 @@
         </select>
         @error('leader_target')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
     </label>
+    <x-ui.schedule-check class="sm:col-span-2" :exclude-id="$agendaItem?->id" />
     <label class="form-field sm:col-span-2">
         <span>Telaahan Staf Persetujuan Kegiatan {{ $agendaItem ? '' : '*' }}</span>
         <input type="file" name="invitation_letter_path" accept=".pdf,.doc,.docx" {{ $agendaItem ? '' : 'required' }}>
@@ -132,97 +132,3 @@
     });
 </script>
 
-<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-sm font-semibold text-slate-900">Konten Visual</p>
-        <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Materi · Status AK · Status Prokopim</p>
-    </div>
-    <div class="mt-3 grid gap-3 text-xs uppercase tracking-[0.18em] text-slate-500 sm:grid-cols-3">
-        <span>Materi</span>
-        <span>Status AK</span>
-        <span>Status Prokopim</span>
-    </div>
-    <div class="mt-3 grid gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <p class="text-sm font-medium text-slate-700">Materi konten visual</p>
-            <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-2">
-                @foreach (['visual ucapan', 'ucapan duka', 'spanduk', 'baliho', 'foto kegiatan/carosel', 'visual berita/infografis', 'quotws pipinan', 'informasi lainnya', 'tidak ada', 'lainnya(catatan)'] as $option)
-                    <label class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                        <input type="checkbox" name="visual_content[]" value="{{ $option }}" @checked(in_array($option, $visualContentSelection, true)) class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                        <span>{{ $option }}</span>
-                    </label>
-                @endforeach
-            </div>
-            @error('visual_content')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-            @error('visual_content.*')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-            <label class="form-field mt-4">
-                <span>Catatan konten visual</span>
-                <input type="text" name="visual_other_note" value="{{ $currentValue('visual_other_note', $agendaItem?->visual_other_note) }}" placeholder="Catatan tambahan visual">
-                @error('visual_other_note')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-            </label>
-        </div>
-
-        <label class="form-field">
-            <span>Status AK</span>
-            <select name="visual_status_ak">
-                <option value="">Pilih status</option>
-                @foreach (['Belum', 'menunggu', 'sedang dikerjakan', 'selesai'] as $statusOption)
-                    <option value="{{ $statusOption }}" @selected($currentValue('visual_status_ak', $agendaItem?->visual_status_ak) === $statusOption)>{{ $statusOption }}</option>
-                @endforeach
-            </select>
-            @error('visual_status_ak')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-        </label>
-
-        <label class="form-field">
-            <span>Status Prokopim</span>
-            <select name="visual_status_prokopim">
-                <option value="">Pilih status</option>
-                @foreach (['belum ada bahan', 'sudah ada bahan dokumentasi', 'belum diperiksa', 'perlu revisi', 'ok tayang'] as $statusOption)
-                    <option value="{{ $statusOption }}" @selected($currentValue('visual_status_prokopim', $agendaItem?->visual_status_prokopim) === $statusOption)>{{ $statusOption }}</option>
-                @endforeach
-            </select>
-            @error('visual_status_prokopim')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-        </label>
-    </div>
-</div>
-
-<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 mt-4">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-sm font-semibold text-slate-900">Konten Video</p>
-        <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Materi · Status AK · Status Prokopim</p>
-    </div>
-    <div class="mt-3 grid gap-3 text-xs uppercase tracking-[0.18em] text-slate-500 sm:grid-cols-3">
-        <span>Materi</span>
-        <span>Status AK</span>
-        <span>Status Prokopim</span>
-    </div>
-    <div class="mt-3 grid gap-3 sm:grid-cols-3">
-        <label class="form-field">
-            <span>Materi konten video</span>
-            <input type="text" name="video_content" value="{{ $currentValue('video_content', $agendaItem?->video_content) }}" placeholder="Judul atau jenis video yang dibutuhkan">
-            @error('video_content')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-        </label>
-
-        <label class="form-field">
-            <span>Status AK</span>
-            <select name="video_status_ak">
-                <option value="">Pilih status</option>
-                @foreach (['Belum', 'menunggu', 'sedang dikerjakan', 'selesai'] as $statusOption)
-                    <option value="{{ $statusOption }}" @selected($currentValue('video_status_ak', $agendaItem?->video_status_ak) === $statusOption)>{{ $statusOption }}</option>
-                @endforeach
-            </select>
-            @error('video_status_ak')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-        </label>
-
-        <label class="form-field">
-            <span>Status Prokopim</span>
-            <select name="video_status_prokopim">
-                <option value="">Pilih status</option>
-                @foreach (['belum ada bahan', 'sudah ada bahan dokumentasi', 'belum diperiksa', 'perlu revisi', 'ok tayang'] as $statusOption)
-                    <option value="{{ $statusOption }}" @selected($currentValue('video_status_prokopim', $agendaItem?->video_status_prokopim) === $statusOption)>{{ $statusOption }}</option>
-                @endforeach
-            </select>
-            @error('video_status_prokopim')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-        </label>
-    </div>
-</div>

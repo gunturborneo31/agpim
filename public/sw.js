@@ -1,4 +1,12 @@
-const CACHE_NAME = 'agpim-shell-v1';
+const CACHE_NAME = 'agpim-shell-v2';
+
+// Hanya file statis yang disimpan di cache. Permintaan data (JSON/AJAX, mis. pengecekan
+// usulan baru, file dokumen) selalu langsung ke server supaya tidak basi dan cache tidak membengkak.
+const isStaticAsset = (url) => url.origin === self.location.origin
+    && (url.pathname.startsWith('/build/')
+        || url.pathname.startsWith('/icon-')
+        || url.pathname === '/favicon.ico'
+        || url.pathname === '/manifest.json');
 const OFFLINE_URLS = [
     '/',
     '/manifest.json',
@@ -41,6 +49,10 @@ self.addEventListener('fetch', event => {
                 .catch(() => caches.match('/') )
         );
         return;
+    }
+
+    if (!isStaticAsset(requestUrl)) {
+        return; // biarkan browser mengambil langsung dari jaringan
     }
 
     event.respondWith(

@@ -10,10 +10,10 @@
     @endif
 
     @if ($title)
-        <h2 class="mt-2 text-2xl font-semibold text-slate-900">{{ $title }}</h2>
+        <h2 @class(['text-xl font-semibold text-ink', 'mt-1' => $eyebrow])>{{ $title }}</h2>
     @endif
 
     @if ($subtitle)
-        <p class="mt-2 text-sm text-slate-600">{{ $subtitle }}</p>
+        <p class="mt-1 text-sm text-muted">{{ $subtitle }}</p>
     @endif
 </div>

@@ -7,16 +7,19 @@ use App\Events\AgendaSubmitted;
 use App\Http\Requests\StoreAgendaRequest;
 use App\Http\Requests\UpdateAgendaRequest;
 use App\Models\Agenda;
+use App\Models\AgendaRevisionLink;
 use App\Models\AgendaType;
 use App\Models\AppNotification;
 use App\Models\Opd;
 use App\Models\User;
+use App\Support\WaPhoneFormatter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -35,6 +38,18 @@ class AgendaController extends Controller
         $endDate = trim((string) $request->string('end_date'));
         $sort = $request->string('sort')->toString();
 
+        // Verifikator langsung melihat antrean "Diajukan", yang paling dekat tanggalnya lebih dulu.
+        // ?status=all menampilkan semua status.
+        if ($isVerificationMode && $request->query('status') === null) {
+            $status = 'submitted';
+            if ($request->query('sort') === null) {
+                $sort = 'oldest';
+            }
+        }
+        if ($status === 'all') {
+            $status = '';
+        }
+
         if ($startDate !== '' && $endDate !== '' && $startDate > $endDate) {
             [$startDate, $endDate] = [$endDate, $startDate];
         }
@@ -50,8 +65,8 @@ class AgendaController extends Controller
             'type_desc' => fn ($query) => $query->orderByDesc(AgendaType::select('name')->whereColumn('agenda_types.id', 'agendas.agenda_type_id')),
             'priority_high' => fn ($query) => $query->orderByRaw("CASE priority WHEN 'tinggi' THEN 1 WHEN 'sedang' THEN 2 WHEN 'biasa' THEN 3 ELSE 4 END"),
             'priority_low' => fn ($query) => $query->orderByRaw("CASE priority WHEN 'biasa' THEN 1 WHEN 'sedang' THEN 2 WHEN 'tinggi' THEN 3 ELSE 4 END"),
-            'status_asc' => fn ($query) => $query->orderByRaw("CASE status WHEN 'draft' THEN 1 WHEN 'submitted' THEN 2 WHEN 'under_review' THEN 3 WHEN 'awaiting_disposition' THEN 4 WHEN 'approved' THEN 5 WHEN 'needs_revision' THEN 6 WHEN 'rejected' THEN 7 WHEN 'completed' THEN 8 ELSE 9 END"),
-            'status_desc' => fn ($query) => $query->orderByRaw("CASE status WHEN 'completed' THEN 1 WHEN 'rejected' THEN 2 WHEN 'needs_revision' THEN 3 WHEN 'approved' THEN 4 WHEN 'awaiting_disposition' THEN 5 WHEN 'under_review' THEN 6 WHEN 'submitted' THEN 7 WHEN 'draft' THEN 8 ELSE 9 END"),
+            'status_asc' => fn ($query) => $query->orderByRaw("CASE status WHEN 'draft' THEN 1 WHEN 'submitted' THEN 2 WHEN 'under_review' THEN 3 WHEN 'approved' THEN 4 WHEN 'needs_revision' THEN 5 WHEN 'rejected' THEN 6 WHEN 'cancelled' THEN 7 WHEN 'completed' THEN 8 ELSE 9 END"),
+            'status_desc' => fn ($query) => $query->orderByRaw("CASE status WHEN 'completed' THEN 1 WHEN 'cancelled' THEN 2 WHEN 'rejected' THEN 3 WHEN 'needs_revision' THEN 4 WHEN 'approved' THEN 5 WHEN 'under_review' THEN 6 WHEN 'submitted' THEN 7 WHEN 'draft' THEN 8 ELSE 9 END"),
         ];
 
         if (! array_key_exists($sort, $sortOptions)) {
@@ -59,7 +74,7 @@ class AgendaController extends Controller
         }
 
         $agendaQuery = Agenda::query()
-            ->with(['opd', 'type', 'submitter', 'documents'])
+            ->with(['opd', 'type', 'submitter'])
             ->when($user?->hasRole(UserRole::Opd), fn ($query) => $query->where('submitted_by', $user->id))
             ->when($isVerificationMode, function ($query): void {
                 $query
@@ -76,11 +91,21 @@ class AgendaController extends Controller
                         ->orWhereHas('submitter', fn ($submitterQuery) => $submitterQuery->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($opdId > 0, fn ($query) => $query->where('opd_id', $opdId))
             ->when($startDate !== '', fn ($query) => $query->whereDate('event_date', '>=', $startDate))
             ->when($endDate !== '', fn ($query) => $query->whereDate('event_date', '<=', $endDate))
             ->when($priority !== '', fn ($query) => $query->where('priority', $priority));
+
+        // Jumlah per status (mengikuti filter lain) untuk tab di atas tabel.
+        $statusCounts = (clone $agendaQuery)
+            ->reorder()
+            ->toBase()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->map(fn ($total) => (int) $total);
+
+        $agendaQuery->when($status !== '', fn ($query) => $query->where('status', $status));
 
         $sortOptions[$sort]($agendaQuery);
 
@@ -91,6 +116,7 @@ class AgendaController extends Controller
             'agendaTypes' => AgendaType::query()->orderBy('name')->get(),
             'opdOptions' => Opd::query()->orderBy('name')->get(['id', 'name']),
             'isVerificationMode' => $isVerificationMode,
+            'statusCounts' => $statusCounts,
             'filters' => [
                 'search' => $search,
                 'status' => $status,
@@ -106,7 +132,6 @@ class AgendaController extends Controller
     public function store(StoreAgendaRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $validated['visual_content'] = $request->input('visual_content', []);
         $validated['invitation_letter_path'] = $request->file('invitation_letter_path')->store('agendas/invitations', 'public');
 
         if ($request->hasFile('speech_draft_path')) {
@@ -167,7 +192,7 @@ class AgendaController extends Controller
         abort_unless($agenda->is_internal_public || request()->user(), 403);
 
         return view('agendas.show', [
-            'agenda' => $agenda->load(['opd', 'type', 'submitter', 'reviewer', 'documents.uploader', 'dispositions', 'followUps.attachments']),
+            'agenda' => $agenda->load(['opd', 'type', 'submitter', 'reviewer', 'followUps.attachments']),
             'conflicts' => $agenda->conflicts(),
         ]);
     }
@@ -176,7 +201,7 @@ class AgendaController extends Controller
     {
         Gate::authorize('update', $agenda);
 
-        if ($agenda->status !== 'submitted') {
+        if (! in_array($agenda->status, ['submitted', 'needs_revision'], true)) {
             abort(403);
         }
 
@@ -188,12 +213,11 @@ class AgendaController extends Controller
 
     public function update(UpdateAgendaRequest $request, Agenda $agenda): RedirectResponse
     {
-        if ($agenda->status !== 'submitted') {
+        if (! in_array($agenda->status, ['submitted', 'needs_revision'], true)) {
             abort(403);
         }
 
         $validated = $request->validated();
-        $validated['visual_content'] = $request->input('visual_content', []);
 
         $timeUnknown = (bool) ($validated['time_unknown'] ?? false);
         $validated['time_unknown'] = $timeUnknown;
@@ -210,30 +234,45 @@ class AgendaController extends Controller
             unset($validated['speech_draft_path']);
         }
 
-        DB::transaction(function () use ($request, $agenda, $validated): void {
+        // Pengajuan yang diminta revisi otomatis diajukan ulang setelah diperbaiki.
+        $isResubmission = $agenda->status === 'needs_revision';
+        if ($isResubmission) {
+            $validated['status'] = 'submitted';
+            $validated['submitted_at'] = now();
+        }
+
+        DB::transaction(function () use ($request, $agenda, $validated, $isResubmission): void {
             $agenda->update($validated);
 
             $agenda->verifications()->create([
                 'verified_by' => $request->user()->id,
-                'action' => 'updated_submission',
-                'note' => 'Pengajuan diperbarui saat status masih diajukan.',
+                'action' => $isResubmission ? 'resubmitted' : 'updated_submission',
+                'note' => $isResubmission
+                    ? 'Pengajuan direvisi dan diajukan ulang.'
+                    : 'Pengajuan diperbarui saat status masih diajukan.',
                 'metadata' => ['source' => 'web'],
             ]);
         });
 
-        return to_route('agendas.index')->with('status', 'Pengajuan agenda berhasil diperbarui.');
+        return to_route('agendas.index')->with('status', $isResubmission
+            ? 'Revisi tersimpan. Pengajuan diajukan ulang untuk diverifikasi.'
+            : 'Pengajuan agenda berhasil diperbarui.');
     }
 
-    public function verify(Request $request, Agenda $agenda): RedirectResponse
+    public function verify(Request $request, Agenda $agenda): RedirectResponse|JsonResponse
     {
         abort_unless($request->user() && ! $request->user()->hasRole(UserRole::Opd), 403);
 
         if (! $agenda->submitter?->hasRole(UserRole::Opd)) {
-            return back()->with('status', 'Agenda ini tidak tersedia untuk verifikasi super admin.');
+            $message = 'Agenda ini tidak tersedia untuk verifikasi super admin.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message], 422)
+                : back()->with('status', $message);
         }
 
         $validated = $request->validate([
-            'action' => ['required', Rule::in(['approve', 'needs_revision', 'rejected'])],
+            'action' => ['required', Rule::in(['approve', 'needs_revision', 'rejected', 'cancel'])],
             'note' => ['nullable', 'string', 'max:1000'],
             'attendance_source' => ['nullable', Rule::in(array_keys(config('agpim.attendance_sources')))],
             'leader_target' => ['nullable', Rule::in(array_keys(config('agpim.dispositions')))],
@@ -280,22 +319,41 @@ class AgendaController extends Controller
         }
 
         $status = match ($validated['action']) {
-            'approve' => 'awaiting_disposition',
+            'approve' => 'approved',
             'needs_revision' => 'needs_revision',
             'rejected' => 'rejected',
+            'cancel' => 'cancelled',
         };
 
         DB::transaction(function () use ($request, $agenda, $validated, $status): void {
-            $agenda->update([
+            $attributes = [
                 'status' => $status,
                 'reviewed_by' => $request->user()->id,
                 'verified_at' => now(),
                 'verification_note' => $validated['note'] ?? null,
-                'attendance_source' => $validated['action'] === 'approve' ? ($validated['attendance_source'] ?? null) : null,
-                'leader_target' => $validated['action'] === 'approve' ? ($validated['leader_target'] ?? null) : $agenda->leader_target,
-                'delegate_name' => $validated['action'] === 'approve' && (($validated['leader_target'] ?? null) === 'other_official') ? ($validated['delegate_name'] ?? null) : null,
-                'delegate_title' => $validated['action'] === 'approve' && (($validated['leader_target'] ?? null) === 'other_official') ? ($validated['delegate_title'] ?? null) : null,
-            ]);
+            ];
+
+            if ($validated['action'] === 'approve') {
+                $toOther = ($validated['leader_target'] ?? null) === 'other_official';
+                $attributes += [
+                    'decided_at' => now(),
+                    'attendance_source' => $validated['attendance_source'] ?? null,
+                    'leader_target' => $validated['leader_target'] ?? null,
+                    'delegate_name' => $toOther ? ($validated['delegate_name'] ?? null) : null,
+                    'delegate_title' => $toOther ? ($validated['delegate_title'] ?? null) : null,
+                ];
+            } elseif ($validated['action'] !== 'cancel') {
+                // Perlu revisi / ditolak: keputusan disposisi sebelumnya tidak berlaku lagi.
+                $attributes += [
+                    'decided_at' => null,
+                    'attendance_source' => null,
+                    'delegate_name' => null,
+                    'delegate_title' => null,
+                ];
+            }
+            // Dibatalkan: data disposisi dibiarkan sebagai riwayat.
+
+            $agenda->update($attributes);
 
             $agenda->verifications()->create([
                 'verified_by' => $request->user()->id,
@@ -305,7 +363,96 @@ class AgendaController extends Controller
             ]);
         });
 
+        if ($request->expectsJson()) {
+            $agenda->refresh()->load('submitter');
+            $statusLabel = config('agpim.statuses')[$agenda->status] ?? $agenda->status;
+
+            return response()->json([
+                'message' => 'Keputusan tersimpan: '.$statusLabel.'.',
+                'status' => $agenda->status,
+                'status_label' => $statusLabel,
+                'status_html' => Blade::render('<x-ui.status-pill :status="$status" :text="$text" />', ['status' => $agenda->status, 'text' => $statusLabel]),
+                'whatsapp_number' => $this->decisionPhone($agenda),
+            ]);
+        }
+
         return to_route('agendas.index')->with('status', 'Verifikasi agenda berhasil diperbarui.');
+    }
+
+    /**
+     * Usulan yang masuk (atau diajukan ulang) sejak waktu tertentu. Dipanggil berkala
+     * oleh halaman Agenda admin untuk notifikasi otomatis tanpa refresh.
+     */
+    public function incoming(Request $request): JsonResponse
+    {
+        abort_unless($request->user() && ! $request->user()->hasRole(UserRole::Opd), 403);
+
+        $now = now();
+        try {
+            $since = $request->filled('since') ? Carbon::parse((string) $request->query('since')) : $now;
+        } catch (\Throwable) {
+            $since = $now;
+        }
+
+        $fromOpd = fn ($query) => $query
+            ->where('status', 'submitted')
+            ->whereHas('submitter', fn ($q) => $q->where('role', UserRole::Opd->value));
+
+        $items = Agenda::query()
+            ->with('opd')
+            ->where($fromOpd)
+            ->where('submitted_at', '>=', $since)
+            ->orderBy('submitted_at')
+            ->limit(10)
+            ->get()
+            ->map(fn (Agenda $agenda) => [
+                'id' => $agenda->id,
+                'title' => $agenda->title,
+                'opd' => $agenda->opd->alias ?? $agenda->opd->name ?? '-',
+                'submitted_at' => $agenda->submitted_at?->toIso8601String(),
+            ]);
+
+        return response()->json([
+            'now' => $now->toIso8601String(),
+            'pending' => Agenda::query()->where($fromOpd)->count(),
+            'items' => $items,
+        ]);
+    }
+
+    /**
+     * Siapkan pesan WhatsApp berisi status pengajuan. Untuk status "Perlu revisi",
+     * sekaligus buat link revisi sekali pakai (link lama otomatis tidak berlaku).
+     */
+    public function whatsappStatus(Request $request, Agenda $agenda): JsonResponse
+    {
+        abort_unless($request->user() && ! $request->user()->hasRole(UserRole::Opd), 403);
+
+        $agenda->load('submitter');
+        $phone = $this->decisionPhone($agenda);
+        if (! $phone) {
+            return response()->json(['message' => 'Nomor WhatsApp pengaju tidak tersedia pada pengajuan ini.'], 422);
+        }
+
+        $revisionUrl = null;
+        if ($agenda->status === 'needs_revision') {
+            $token = AgendaRevisionLink::issueFor($agenda, $request->user());
+            $revisionUrl = route('revisions.edit', $token);
+
+            $agenda->verifications()->create([
+                'verified_by' => $request->user()->id,
+                'action' => 'revision_link_sent',
+                'note' => 'Link revisi dikirim lewat WhatsApp.',
+                'metadata' => ['source' => 'web', 'phone' => $phone],
+            ]);
+        }
+
+        $statusLabel = config('agpim.statuses')[$agenda->status] ?? $agenda->status;
+
+        return response()->json([
+            'url' => $this->decisionWhatsappUrl($agenda, $statusLabel, $phone, $revisionUrl),
+            'number' => $phone,
+            'revision_link' => $revisionUrl !== null,
+        ]);
     }
 
     public function sendInvitation(Request $request, Agenda $agenda): RedirectResponse
@@ -368,91 +515,61 @@ class AgendaController extends Controller
         return to_route('agendas.index')->with('status', 'Undangan berhasil dikirim ke OPD yang dipilih.');
     }
 
-    public function updateProkopimStatus(Request $request, Agenda $agenda): RedirectResponse|JsonResponse
+    /** Nomor WA tujuan pemberitahuan keputusan: nomor PIC pada pengajuan, lalu nomor akun pengaju. */
+    private function decisionPhone(Agenda $agenda): ?string
     {
-        abort_unless($request->user() && $request->user()->hasRole(UserRole::AdminProkopim, UserRole::SuperAdmin), 403);
-
-        try {
-            Log::info('updateProkopimStatus called', ['user_id' => $request->user()?->id, 'agenda_id' => $agenda->id, 'payload' => $request->all()]);
-
-            $validated = $request->validate([
-                'visual_status_ak' => ['nullable', Rule::in(['Belum', 'menunggu', 'sedang dikerjakan', 'selesai'])],
-                'video_status_ak' => ['nullable', Rule::in(['Belum', 'menunggu', 'sedang dikerjakan', 'selesai'])],
-                'visual_status_prokopim' => ['nullable', Rule::in(['belum ada bahan', 'sudah ada bahan dokumentasi', 'belum diperiksa', 'perlu revisi', 'ok tayang'])],
-                'video_status_prokopim' => ['nullable', Rule::in(['belum ada bahan', 'sudah ada bahan dokumentasi', 'belum diperiksa', 'perlu revisi', 'ok tayang'])],
-                'visual_content' => ['nullable', 'string', 'max:5000'],
-                'visual_content_status' => ['nullable', Rule::in(['draft', 'fix'])],
-                'visual_published_link' => ['nullable', 'string', 'max:500'],
-                'video_content' => ['nullable', 'string', 'max:5000'],
-                'video_content_status' => ['nullable', Rule::in(['draft', 'fix'])],
-                'video_published_link' => ['nullable', 'string', 'max:500'],
-            ]);
-
-            $update = [];
-            if (array_key_exists('visual_status_ak', $validated)) {
-                $update['visual_status_ak'] = $validated['visual_status_ak'];
+        foreach ([$agenda->pic_phone, $agenda->submitter?->phone] as $candidate) {
+            $normalized = $candidate ? WaPhoneFormatter::normalizeIndonesian((string) $candidate) : null;
+            if ($normalized) {
+                return $normalized;
             }
-            if (array_key_exists('video_status_ak', $validated)) {
-                $update['video_status_ak'] = $validated['video_status_ak'];
-            }
-            if (array_key_exists('visual_status_prokopim', $validated)) {
-                $update['visual_status_prokopim'] = $validated['visual_status_prokopim'];
-            }
-            if (array_key_exists('video_status_prokopim', $validated)) {
-                $update['video_status_prokopim'] = $validated['video_status_prokopim'];
-            }
-            if (array_key_exists('visual_content', $validated)) {
-                $update['visual_content'] = $validated['visual_content'];
-            }
-            if (array_key_exists('visual_content_status', $validated)) {
-                $update['visual_content_status'] = $validated['visual_content_status'];
-            }
-            if (array_key_exists('visual_published_link', $validated)) {
-                $update['visual_published_link'] = $validated['visual_published_link'];
-            }
-            if (array_key_exists('video_content', $validated)) {
-                $update['video_content'] = $validated['video_content'];
-            }
-            if (array_key_exists('video_content_status', $validated)) {
-                $update['video_content_status'] = $validated['video_content_status'];
-            }
-            if (array_key_exists('video_published_link', $validated)) {
-                $update['video_published_link'] = $validated['video_published_link'];
-            }
-
-            Log::info('updateProkopimStatus validated', ['validated' => $validated]);
-
-            if (! empty($update)) {
-                $agenda->update($update);
-
-                $agenda->verifications()->create([
-                    'verified_by' => $request->user()->id,
-                    'action' => 'prokopim_status_updated',
-                    'note' => 'Status/Konten Prokopim diperbarui oleh '.$request->user()->name,
-                    'metadata' => $update,
-                ]);
-                Log::info('updateProkopimStatus updated_agenda', ['agenda_id' => $agenda->id, 'update' => $update]);
-            }
-
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'status' => 'success',
-                    'updated' => $update,
-                ]);
-            }
-
-            return back()->with('status', 'Status/Konten Prokopim berhasil diperbarui.');
-        } catch (ValidationException $e) {
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json(['status' => 'error', 'message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
-            }
-            throw $e;
-        } catch (\Throwable $e) {
-            report($e);
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-            }
-            throw $e;
         }
+
+        return null;
+    }
+
+    /** Link wa.me berisi pesan status pengajuan yang siap dikirim. */
+    private function decisionWhatsappUrl(Agenda $agenda, string $statusLabel, string $phone, ?string $revisionUrl = null): string
+    {
+        $lines = [
+            'Yth. '.($agenda->person_in_charge ?: ($agenda->submitter?->name ?? 'Bapak/Ibu')).',',
+            '',
+            'Pengajuan agenda *'.$agenda->title.'*',
+            'Tanggal: '.$agenda->event_date->translatedFormat('l, j F Y').($agenda->time_unknown ? '' : ', pukul '.$agenda->time_range_display),
+            'Tempat: '.$agenda->location,
+            '',
+            'Status: *'.match ($agenda->status) {
+                'submitted' => 'Diajukan (sedang diverifikasi Prokopim)',
+                'needs_revision' => 'Perlu revisi',
+                'rejected' => 'Ditolak',
+                default => $statusLabel,
+            }.'*',
+        ];
+
+        if ($agenda->status === 'approved' && $agenda->leader_target) {
+            $lines[] = 'Disposisi: '.(config('agpim.dispositions')[$agenda->leader_target] ?? $agenda->leader_target)
+                .($agenda->delegate_name ? ' ('.$agenda->delegate_name.($agenda->delegate_title ? ', '.$agenda->delegate_title : '').')' : '');
+        }
+
+        if ($agenda->verification_note) {
+            $lines[] = ($agenda->status === 'cancelled' ? 'Alasan pembatalan: ' : 'Catatan: ').$agenda->verification_note;
+        }
+
+        if ($agenda->status === 'needs_revision') {
+            $lines[] = '';
+            if ($revisionUrl) {
+                $lines[] = 'Silakan perbaiki pengajuan melalui link berikut:';
+                $lines[] = $revisionUrl;
+                $lines[] = '_Link hanya bisa dipakai satu kali dan berlaku '.AgendaRevisionLink::VALID_DAYS.' hari._';
+            } else {
+                $lines[] = 'Silakan perbaiki pengajuan melalui aplikasi AGPIM, lalu simpan untuk mengajukan ulang.';
+            }
+        }
+
+        $lines[] = '';
+        $lines[] = 'Terima kasih.';
+        $lines[] = 'Prokopim Kabupaten Mahakam Ulu';
+
+        return 'https://wa.me/'.$phone.'?text='.rawurlencode(implode("\n", $lines));
     }
 }

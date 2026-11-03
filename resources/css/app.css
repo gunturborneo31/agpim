@@ -1,42 +1,126 @@
 @import 'tailwindcss';
 
+/*
+ * AGPIM — Opsi A "Tenang & Rapi"
+ * Netral hangat, garis tipis, radius kecil. Warna hanya dipakai untuk hal penting,
+ * dan selalu berupa gradasi lembut (bukan blok warna solid).
+ */
 @theme {
+    --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+
     --color-agpim-blue: #004cca;
-    --color-agpim-blue-soft: #dbe1ff;
+    --color-agpim-blue-soft: #e8eefd;
     --color-agpim-teal: #006a62;
-    --color-agpim-red: #ad1220;
-    --color-agpim-bg: #f8fafc;
+    --color-agpim-red: #c4321f;
+    --color-agpim-bg: #fafaf9;
     --color-agpim-surface: #ffffff;
+
+    --color-ink: #1c1b19;
+    --color-muted: #71706b;
+    --color-line: #e8e7e3;
+    --color-canvas: #fafaf9;
+    --color-hover: #f1f0ed;
+
+    /* Radius dibuat lebih kecil secara global, supaya halaman lama ikut lebih rapi. */
+    --radius-xl: 0.625rem;
+    --radius-2xl: 0.75rem;
+    --radius-3xl: 0.875rem;
+}
+
+:root {
+    --grad-primary: linear-gradient(135deg, #3f6ff0 0%, #8a8ff3 100%);
+    --grad-primary-hover: linear-gradient(135deg, #3563e6 0%, #7c82ef 100%);
+    --grad-highlight: linear-gradient(140deg, #eaf0ff 0%, #f3eeff 55%, #fdf4ee 100%);
+    --grad-nav-active: linear-gradient(90deg, #e8eefd 0%, #f3effc 100%);
+    --grad-ok: linear-gradient(90deg, #e3f4ea 0%, #eef8f2 100%);
+    --grad-wait: linear-gradient(90deg, #fcf0d9 0%, #fdf6e9 100%);
+    --grad-bad: linear-gradient(90deg, #fde5e0 0%, #fdf0ea 100%);
+    --grad-info: linear-gradient(90deg, #e6edfd 0%, #f0eefd 100%);
+    --grad-neutral: linear-gradient(90deg, #f1f0ed 0%, #f6f5f3 100%);
 }
 
 [x-cloak] { display: none !important; }
 
+/* Latar pastel bergradasi — pengganti bg-*-50/100 yang datar. */
+@utility soft-blue { background-image: linear-gradient(120deg, #e8eefd 0%, #f1eefc 100%); background-color: #eef1fd; }
+@utility soft-green { background-image: linear-gradient(120deg, #e1f3e9 0%, #edf8f3 100%); background-color: #e8f5ee; }
+@utility soft-amber { background-image: linear-gradient(120deg, #fcefd6 0%, #fdf6ea 100%); background-color: #fdf2de; }
+@utility soft-red { background-image: linear-gradient(120deg, #fde4df 0%, #fdf0ea 100%); background-color: #fde9e4; }
+
+/* Isian berwarna bergradasi lembut — pengganti bg-*-500/600/700 yang solid. */
+@utility grad-blue { background-image: linear-gradient(135deg, #3f6ff0 0%, #8a8ff3 100%); background-color: #5a7ef1; }
+@utility grad-green { background-image: linear-gradient(135deg, #2f9e6e 0%, #74c9a0 100%); background-color: #45ad80; }
+@utility grad-amber { background-image: linear-gradient(135deg, #d98b1f 0%, #f0bd66 100%); background-color: #e29f3c; }
+@utility grad-red { background-image: linear-gradient(135deg, #dc4f42 0%, #f0977f 100%); background-color: #e3685a; }
+@utility grad-sky { background-image: linear-gradient(135deg, #3496d6 0%, #85c4ee 100%); background-color: #52a8e0; }
+@utility grad-violet { background-image: linear-gradient(135deg, #7a68ee 0%, #b59df5 100%); background-color: #9180f1; }
+@utility grad-ink { background-image: linear-gradient(135deg, #2f3238 0%, #5b5f6b 100%); background-color: #41444c; }
+
 @layer base {
+    /* Tailwind v4 memakai currentColor untuk border tanpa warna; buat default garis tipis. */
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-line, currentColor);
+    }
+
     .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
     }
 
     .nav-icon-active {
-        font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+        font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
     }
 
     .nav-icon-inactive {
-        font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
     }
 
     body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        color: #1a1c1e;
-        background:
-            radial-gradient(circle at top left, rgba(0, 83, 218, 0.12), transparent 42%),
-            radial-gradient(circle at top right, rgba(87, 250, 233, 0.12), transparent 30%),
-            #f8fafc;
+        font-family: var(--font-sans);
+        color: var(--color-ink);
+        background: var(--color-canvas);
+        font-feature-settings: 'ss01';
+    }
+
+    h1, h2, h3, h4 {
+        text-wrap: balance;
+        letter-spacing: -0.015em;
     }
 
     input,
     select,
     textarea {
-        @apply w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:bg-white;
+        @apply w-full rounded-lg border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-100;
+    }
+
+    input[type='checkbox'],
+    input[type='radio'] {
+        @apply w-auto p-0;
+    }
+
+    input[type='file'] {
+        @apply py-1.5 text-muted;
+    }
+
+    input[type='file']::file-selector-button {
+        @apply mr-3 cursor-pointer rounded-md border-0 px-3 py-1.5 text-sm font-medium text-[#2f4fbf];
+        background-image: linear-gradient(120deg, #e8eefd 0%, #f1eefc 100%);
+    }
+
+    :focus-visible {
+        outline: 2px solid #3f6ff0;
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            transition: none !important;
+            animation: none !important;
+        }
     }
 }
 
@@ -45,75 +129,216 @@
         display: inline-flex;
     }
 
+    /* Dipertahankan agar halaman lama tetap jalan, tapi tanpa efek melompat. */
     .nav-interactive {
-        @apply transition duration-200 ease-out;
-        transform: translateY(0) scale(1);
+        @apply transition-colors duration-150;
     }
 
-    .nav-interactive:hover {
-        transform: translateY(-1px) scale(1.01);
+    .tabular {
+        font-variant-numeric: tabular-nums;
     }
 
-    .nav-interactive:active {
-        transform: translateY(0) scale(0.99);
+    /* ---------- Shell ---------- */
+    .app-topbar {
+        @apply sticky top-0 z-30 border-b border-line bg-white/85 backdrop-blur-md;
     }
 
-    .glass-header {
-        @apply sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-xl;
+    /* Menu melayang untuk tamu (desktop & HP). */
+    .guest-dock {
+        @apply fixed left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-2xl border border-white/70 bg-white/80 p-1.5 shadow-[0_10px_30px_rgba(47,79,191,0.14),0_2px_6px_rgba(28,27,25,0.06)] backdrop-blur-xl;
+        bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+        width: min(calc(100% - 2rem), 22rem);
     }
 
+    .guest-dock-wide {
+        width: min(calc(100% - 2rem), 26rem);
+    }
+
+    .dock-badge {
+        background-image: linear-gradient(135deg, #e0952a 0%, #f0bd66 100%);
+        @apply absolute top-0.5 right-[18%] min-w-4 rounded-full px-1 text-center font-mono text-[10px] leading-4 font-medium text-white;
+    }
+
+    .dock-link {
+        @apply flex flex-1 flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[11px] font-medium text-muted transition-colors hover:text-ink;
+    }
+
+    .dock-link .material-symbols-outlined {
+        @apply text-[22px] leading-none;
+    }
+
+    .dock-link-active {
+        background: var(--grad-nav-active);
+        @apply text-[#2f55d4] hover:text-[#2f55d4];
+    }
+
+    .menu-panel {
+        @apply rounded-xl border border-line bg-white p-1.5 shadow-[0_12px_32px_rgba(28,27,25,0.12)];
+    }
+
+    .menu-item {
+        @apply flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-ink hover:bg-hover;
+    }
+
+    .menu-item .material-symbols-outlined {
+        @apply text-[18px] leading-none text-muted;
+    }
+
+    /* ---------- Surfaces ---------- */
     .card-panel {
-        @apply rounded-3xl border border-slate-200/80 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)];
+        @apply rounded-xl border border-line bg-white;
     }
 
     .bento-card {
-        @apply rounded-3xl border border-slate-200/80 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition duration-300;
+        @apply rounded-xl border border-line bg-white;
     }
 
-    .bento-card:hover {
-        @apply -translate-y-0.5 shadow-[0_8px_24px_rgba(0,76,202,0.08)];
+    .highlight-card {
+        background: var(--grad-highlight);
+        @apply rounded-xl border border-[#e1e5f4];
+    }
+
+    .featured-gradient {
+        background: var(--grad-highlight);
     }
 
     .metric-card {
-        @apply rounded-3xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-[0_4px_20px_rgba(0,0,0,0.04)] md:p-5;
+        @apply rounded-xl border border-line bg-white p-4 text-sm text-muted;
     }
 
     .metric-card strong {
-        @apply mt-2 block text-2xl font-bold tracking-tight text-slate-900 md:mt-3 md:text-3xl;
-    }
-
-    .badge-gold {
-        @apply inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-blue-700;
-    }
-
-    .btn-primary {
-        @apply inline-flex items-center justify-center rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(0,76,202,0.25)] transition hover:bg-blue-600;
-    }
-
-    .btn-secondary,
-    .nav-pill,
-    .tab-chip {
-        @apply inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:text-blue-700;
-    }
-
-    .tab-chip-active {
-        @apply border-blue-200 bg-blue-50 text-blue-700;
-    }
-
-    .section-label {
-        @apply text-xs font-semibold uppercase tracking-[0.25em] text-blue-700/80;
+        @apply mt-1 block font-mono text-2xl font-medium tracking-tight text-ink md:text-[1.75rem];
     }
 
     .feature-card {
-        @apply rounded-3xl border border-slate-200 bg-white p-5;
+        @apply rounded-xl border border-line bg-white p-5;
     }
 
     .feature-card h3 {
-        @apply text-lg font-semibold text-slate-900;
+        @apply text-base font-semibold text-ink;
     }
 
     .feature-card p {
-        @apply mt-2 text-sm leading-7 text-slate-600;
+        @apply mt-1.5 text-sm leading-6 text-muted;
+    }
+
+    .timeline-card,
+    .empty-state {
+        @apply rounded-lg border border-line bg-white p-3.5;
+    }
+
+    /* Pasangan label–isi: tanpa kotak, cukup garis tipis di atas. */
+    .detail-card {
+        @apply border-t border-line py-3;
+    }
+
+    /* Bungkus field form: label di atas input, tanpa kotak. */
+    .form-field {
+        @apply block;
+    }
+
+    .detail-card span,
+    .form-field span {
+        @apply block text-xs font-medium text-muted;
+    }
+
+    .form-field span + input,
+    .form-field span + select,
+    .form-field span + textarea {
+        @apply mt-1.5;
+    }
+
+    /* Penanda field wajib, pengganti tanda bintang. */
+    .req {
+        background-image: linear-gradient(90deg, #fde5e0 0%, #fdf0ea 100%);
+        @apply ml-1.5 inline-flex rounded-full px-1.5 py-px align-middle text-[10.5px] font-medium not-italic text-[#c4321f];
+    }
+
+    /* Hasil render DOCX di pratinjau file. */
+    .docx-preview > * + * { margin-top: 0.6em; }
+    .docx-preview h1, .docx-preview h2, .docx-preview h3 { font-weight: 600; font-size: 1.05em; }
+    .docx-preview table { border-collapse: collapse; }
+    .docx-preview td, .docx-preview th { border: 1px solid var(--color-line); padding: 4px 8px; }
+    .docx-preview ul { list-style: disc; padding-left: 1.25rem; }
+    .docx-preview ol { list-style: decimal; padding-left: 1.25rem; }
+    .docx-preview img { max-width: 100%; height: auto; }
+
+    .detail-card strong {
+        @apply mt-1 block text-sm font-medium text-ink;
+    }
+
+    .empty-state {
+        @apply border-dashed bg-transparent text-sm text-muted;
+    }
+
+    /* ---------- Text ---------- */
+    .section-label {
+        @apply text-[13px] font-medium text-muted;
+    }
+
+    .badge-gold {
+        background: var(--grad-info);
+        @apply inline-flex rounded-full px-3 py-1 text-xs font-medium text-[#2f4fbf];
+    }
+
+    /* ---------- Buttons ---------- */
+    .btn-primary {
+        background: var(--grad-primary);
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgba(47,79,191,0.25)] transition;
+    }
+
+    .btn-primary:hover {
+        background: var(--grad-primary-hover);
+    }
+
+    .btn-secondary,
+    .nav-pill {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-hover;
+    }
+
+    .tab-chip {
+        @apply inline-flex items-center justify-center rounded-md px-3 py-1.5 text-sm text-muted transition-colors hover:text-ink;
+    }
+
+    .tab-chip-active {
+        @apply bg-white font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.08)];
+    }
+
+    .segmented {
+        @apply inline-flex rounded-lg bg-hover p-0.5;
+    }
+
+    /* ---------- Status ---------- */
+    .chip {
+        @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium;
+    }
+
+    .chip::before {
+        content: '';
+        @apply h-1.5 w-1.5 rounded-full bg-current;
+    }
+
+    .chip-ok { background: var(--grad-ok); @apply text-[#227446]; }
+    .chip-wait { background: var(--grad-wait); @apply text-[#9a5c06]; }
+    .chip-bad { background: var(--grad-bad); @apply text-[#c4321f]; }
+    .chip-info { background: var(--grad-info); @apply text-[#2f4fbf]; }
+    .chip-neutral { background: var(--grad-neutral); @apply text-muted; }
+
+    .priority-chip {
+        @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium;
+    }
+
+    .priority-tinggi { background: var(--grad-bad); @apply text-[#c4321f]; }
+    .priority-sedang { background: var(--grad-wait); @apply text-[#9a5c06]; }
+    .priority-biasa { background: var(--grad-info); @apply text-[#2f4fbf]; }
+
+    /* ---------- Agenda rows ---------- */
+    .agenda-row {
+        @apply grid grid-cols-[3.25rem_minmax(0,1fr)] items-start gap-3 border-b border-line py-3 sm:grid-cols-[3.25rem_minmax(0,1fr)_auto];
+    }
+
+    .agenda-row time {
+        @apply pt-px font-mono text-[13px] text-muted;
     }
 
     .timeline-item {
@@ -121,51 +346,36 @@
     }
 
     .timeline-hour {
-        @apply pt-2 text-sm font-semibold text-slate-700;
+        @apply pt-2 font-mono text-sm text-muted;
     }
 
     .timeline-dot {
-        @apply mt-3 h-4 w-4 rounded-full bg-blue-600 shadow-[0_6px_16px_rgba(0,76,202,0.25)];
+        background: var(--grad-primary);
+        @apply mt-3 h-3 w-3 rounded-full;
     }
 
-    .timeline-card,
-    .detail-card,
-    .empty-state,
-    .form-field {
-        @apply rounded-2xl border border-slate-200 bg-white p-3.5 md:p-4;
+    /* ---------- Mini calendar ---------- */
+    .mini-cal-day {
+        @apply relative flex h-9 items-center justify-center rounded-lg font-mono text-xs text-ink transition-colors hover:bg-hover;
     }
 
-    .detail-card span,
-    .form-field span {
-        @apply block text-xs uppercase tracking-[0.2em] text-slate-500;
+    .mini-cal-day.is-out {
+        @apply text-slate-300;
     }
 
-    .detail-card strong {
-        @apply mt-2 block text-sm font-medium text-slate-900;
+    .mini-cal-day.has-agenda::after {
+        content: '';
+        background: var(--grad-primary);
+        @apply absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full;
     }
 
-    .priority-chip {
-        @apply inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em];
+    .mini-cal-day.is-today {
+        background: var(--grad-primary);
+        @apply text-white hover:bg-none;
     }
 
-    .priority-tinggi {
-        @apply border border-red-200 bg-red-50 text-red-700;
-    }
-
-    .priority-sedang {
-        @apply border border-teal-200 bg-teal-50 text-teal-700;
-    }
-
-    .priority-biasa {
-        @apply border border-blue-200 bg-blue-50 text-blue-700;
-    }
-
-    .empty-state {
-        @apply text-sm text-slate-500;
-    }
-
-    .featured-gradient {
-        background: linear-gradient(135deg, #0062ff 0%, #004cca 100%);
+    .mini-cal-day.is-today::after {
+        background: #fff;
     }
 }
 
@@ -178,19 +388,21 @@
     #offline-banner,
     .fixed,
     .no-print,
+    .app-sidebar,
+    .app-topbar,
+    .app-tabbar,
     [x-cloak] {
         display: none !important;
     }
 
-    .glass-header,
-    .bottom-popup-panel,
-    .user-action-panel {
-        display: none !important;
+    .app-main {
+        padding-left: 0 !important;
     }
 
     .card-panel,
     .rounded-3xl,
     .rounded-2xl,
+    .rounded-xl,
     .rounded-\[1\.75rem\] {
         box-shadow: none !important;
         border-color: #cbd5e1 !important;

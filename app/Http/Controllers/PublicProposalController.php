@@ -73,8 +73,9 @@ class PublicProposalController extends Controller
                 'description' => $validated['description'],
                 'priority' => $validated['priority'] ?? 'biasa',
                 'leader_target' => $validated['leader_target'],
-                'person_in_charge' => $validated['person_in_charge'] ?? null,
-                'pic_phone' => $validated['pic_phone'] ?? null,
+                // PIC = pengusul (field PIC tidak lagi ditanyakan terpisah di form).
+                'person_in_charge' => $validated['person_in_charge'] ?? $validated['submitter_name'],
+                'pic_phone' => $validated['pic_phone'] ?? $validated['submitter_phone'],
                 'invitation_letter_path' => $invitationPath,
                 'speech_draft_path' => $speechPath,
                 'speech_draft_note' => $validated['speech_draft_note'] ?? null,

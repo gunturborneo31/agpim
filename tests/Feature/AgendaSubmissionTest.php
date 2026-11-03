@@ -242,14 +242,14 @@ class AgendaSubmissionTest extends TestCase
             'leader_target' => 'other_official',
             'delegate_name' => 'Dr. Rina Saputri',
             'delegate_title' => 'Asisten Administrasi Umum',
-            'note' => 'Data lengkap dan disetujui ke tahap disposisi.',
+            'note' => 'Data lengkap dan disetujui.',
         ]);
 
         $response->assertRedirect('/agendas');
 
         $this->assertDatabaseHas('agendas', [
             'id' => $agenda->id,
-            'status' => 'awaiting_disposition',
+            'status' => 'approved',
             'reviewed_by' => $superAdmin->id,
             'attendance_source' => 'disposition',
             'leader_target' => 'other_official',
@@ -300,7 +300,7 @@ class AgendaSubmissionTest extends TestCase
 
         $this->assertDatabaseHas('agendas', [
             'id' => $agenda->id,
-            'status' => 'awaiting_disposition',
+            'status' => 'approved',
             'reviewed_by' => $adminProkopim->id,
         ]);
     }
@@ -448,7 +448,7 @@ class AgendaSubmissionTest extends TestCase
             'location' => 'Ruang Verifikasi',
             'description' => 'Agenda bukan status diajukan.',
             'priority' => 'sedang',
-            'status' => 'awaiting_disposition',
+            'status' => 'approved',
             'leader_target' => 'sekda',
             'invitation_letter_path' => 'documents/agenda-no-edit.pdf',
             'submitted_at' => now(),
@@ -505,7 +505,7 @@ class AgendaSubmissionTest extends TestCase
 
         $this->assertDatabaseHas('agendas', [
             'id' => $agenda->id,
-            'status' => 'awaiting_disposition',
+            'status' => 'approved',
             'reviewed_by' => $verifikator->id,
         ]);
     }

@@ -20,7 +20,7 @@ class PublicAgendaController extends Controller
         $year = max(2020, min(2100, $year));
 
         $selectedStatus = $request->string('status')->toString();
-        if (! in_array($selectedStatus, ['all', 'submitted', 'rejected', 'approved', 'awaiting_disposition'], true)) {
+        if (! in_array($selectedStatus, ['all', 'submitted', 'rejected', 'approved'], true)) {
             $selectedStatus = 'submitted';
         }
 
@@ -38,7 +38,6 @@ class PublicAgendaController extends Controller
             ->selectRaw("SUM(CASE WHEN agendas.status = 'submitted' THEN 1 ELSE 0 END) as submitted_count")
             ->selectRaw("SUM(CASE WHEN agendas.status = 'rejected' THEN 1 ELSE 0 END) as rejected_count")
             ->selectRaw("SUM(CASE WHEN agendas.status = 'approved' THEN 1 ELSE 0 END) as approved_count")
-            ->selectRaw("SUM(CASE WHEN agendas.status = 'awaiting_disposition' THEN 1 ELSE 0 END) as pending_count")
             ->get()
             ->map(fn ($row) => [
                 'opd_id' => (int) $row->opd_id,
@@ -47,7 +46,6 @@ class PublicAgendaController extends Controller
                 'submitted' => (int) $row->submitted_count,
                 'rejected' => (int) $row->rejected_count,
                 'approved' => (int) $row->approved_count,
-                'pending' => (int) $row->pending_count,
             ]);
 
         $totals = [
@@ -56,7 +54,6 @@ class PublicAgendaController extends Controller
                 ->count(),
             'submitted' => $resumeRows->sum('submitted'),
             'approved' => $resumeRows->sum('approved'),
-            'pending' => $resumeRows->sum('pending'),
             'rejected' => $resumeRows->sum('rejected'),
         ];
 
@@ -90,7 +87,7 @@ class PublicAgendaController extends Controller
         }
 
         $query = Agenda::query()
-            ->with(['opd', 'type', 'documents'])
+            ->with(['opd', 'type'])
             ->where('opd_id', $opdId)
             ->whereBetween('event_date', [$periodStart->toDateString(), $periodEnd->toDateString()])
             ->orderByDesc('event_date')
@@ -106,10 +103,6 @@ class PublicAgendaController extends Controller
 
         if ($status === 'approved') {
             $query->where('status', 'approved');
-        }
-
-        if ($status === 'awaiting_disposition') {
-            $query->where('status', 'awaiting_disposition');
         }
 
         return $query->get();

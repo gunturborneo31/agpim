@@ -40,17 +40,6 @@ class Agenda extends Model
         'verification_note',
         'disposition_note',
         'is_internal_public',
-        'visual_content',
-        'visual_content_status',
-        'visual_published_link',
-        'visual_other_note',
-        'visual_status_ak',
-        'visual_status_prokopim',
-        'video_content',
-        'video_content_status',
-        'video_published_link',
-        'video_status_ak',
-        'video_status_prokopim',
         'submitted_at',
         'verified_at',
         'decided_at',
@@ -67,7 +56,6 @@ class Agenda extends Model
             'completed_at' => 'datetime',
             'is_internal_public' => 'boolean',
             'time_unknown' => 'boolean',
-            'visual_content' => 'array',
         ];
     }
 
@@ -98,19 +86,9 @@ class Agenda extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
-    public function documents(): HasMany
-    {
-        return $this->hasMany(AgendaDocument::class);
-    }
-
     public function verifications(): HasMany
     {
         return $this->hasMany(AgendaVerification::class);
-    }
-
-    public function dispositions(): HasMany
-    {
-        return $this->hasMany(AgendaDisposition::class);
     }
 
     public function followUps(): HasMany

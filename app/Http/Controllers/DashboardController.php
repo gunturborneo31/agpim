@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
 use App\Models\Agenda;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -11,7 +12,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request): View|JsonResponse
     {
         $leaders = [
             'bupati' => 'Bupati',
@@ -47,6 +48,7 @@ class DashboardController extends Controller
         $agendas = Agenda::query()
             ->with(['opd', 'type'])
             ->forLeader($leader)
+            ->where('status', '!=', 'cancelled')
             ->whereDate('event_date', '>=', $today)
             ->orderBy('event_date')
             ->orderBy('start_time')
@@ -55,13 +57,21 @@ class DashboardController extends Controller
         $calendarAgendas = Agenda::query()
             ->with(['opd', 'type'])
             ->forLeader($leader)
+            ->where('status', '!=', 'cancelled')
             ->whereBetween('event_date', [$calendarMonth->copy()->startOfMonth()->toDateString(), $calendarMonth->copy()->endOfMonth()->toDateString()])
             ->orderBy('event_date')
             ->orderBy('start_time')
             ->get();
 
         $todayAgendas = $agendas->filter(fn (Agenda $agenda) => Carbon::parse($agenda->event_date)->isSameDay($today));
-        $nextAgenda = $agendas->first();
+        // Agenda berikutnya = yang belum selesai (agenda tanpa jam pasti tetap dihitung).
+        $nextAgenda = $agendas->first(function (Agenda $agenda) {
+            if ($agenda->time_unknown || ! $agenda->end_time) {
+                return true;
+            }
+
+            return Carbon::parse($agenda->event_date)->setTimeFromTimeString($agenda->end_time)->isFuture();
+        });
         $calendarAgendaMap = $calendarAgendas->groupBy(fn (Agenda $agenda) => Carbon::parse($agenda->event_date)->toDateString());
 
         $calendarDays = collect();
@@ -72,10 +82,36 @@ class DashboardController extends Controller
                 'date' => $dateKey,
                 'day' => $date->day,
                 'month' => $date->month,
-                'isCurrentMonth' => $date->isSameMonth($today),
+                'isCurrentMonth' => $date->isSameMonth($calendarMonth),
                 'isToday' => $date->isSameDay($today),
                 'count' => $calendarAgendaMap->get($dateKey, collect())->count(),
             ]);
+        }
+
+        $calendarMap = $calendarAgendaMap->map(fn ($items) => $items->map(fn (Agenda $agenda) => [
+            'title' => $agenda->title,
+            'date' => Carbon::parse($agenda->event_date)->translatedFormat('d M Y'),
+            'time' => $agenda->time_range_display,
+            'location' => $agenda->location,
+            'type' => $agenda->type->name,
+            'priority' => $agenda->priority,
+            'priorityLabel' => config('agpim.priorities')[$agenda->priority]['label'],
+        ]));
+
+        // Ganti bulan kalender lewat AJAX: kirim kalender saja, tanpa seluruh halaman.
+        if ($request->wantsJson()) {
+            return response()->json([
+                'html' => view('dashboards.partials.calendar', [
+                    'leader' => $leader,
+                    'calendarMonth' => $calendarMonth,
+                    'calendarMonthLabel' => $calendarMonth->translatedFormat('F Y'),
+                    'calendarDays' => $calendarDays,
+                ])->render(),
+                'map' => $calendarMap,
+                'year' => $calendarMonth->year,
+                'month' => $calendarMonth->month,
+                'label' => $calendarMonth->translatedFormat('F Y'),
+            ])->header('Vary', 'Accept');
         }
 
         return view('dashboards.leader', [
@@ -87,22 +123,12 @@ class DashboardController extends Controller
             'summary' => [
                 'today' => $todayAgendas->count(),
                 'highPriority' => $todayAgendas->where('priority', 'tinggi')->count(),
-                'pendingDecision' => $todayAgendas->where('status', 'awaiting_disposition')->count(),
                 'completed' => $todayAgendas->where('status', 'completed')->count(),
             ],
             'nextAgenda' => $nextAgenda,
             'timeline' => $todayAgendas,
             'calendarDays' => $calendarDays,
-            'calendarAgendaMap' => $calendarAgendaMap->map(fn ($items) => $items->map(fn (Agenda $agenda) => [
-                'title' => $agenda->title,
-                'date' => Carbon::parse($agenda->event_date)->translatedFormat('d M Y'),
-                'time' => $agenda->time_range_display,
-                'location' => $agenda->location,
-                'type' => $agenda->type->name,
-                'priority' => $agenda->priority,
-                'priorityLabel' => config('agpim.priorities')[$agenda->priority]['label'],
-            ])),
-            'pending' => $agendas->where('status', 'awaiting_disposition')->take(4),
+            'calendarAgendaMap' => $calendarMap,
             'priorities' => $agendas->where('priority', 'tinggi')->take(4),
             'quickTabs' => $this->buildQuickTabs($agendas, $today),
             'conflicts' => $this->detectConflicts($todayAgendas),

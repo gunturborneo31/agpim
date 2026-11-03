@@ -1,16 +1,16 @@
 @extends('layouts.app', ['title' => 'AGPIM • Daftar User'])
 
 @section('content')
-<x-ui.panel>
+<x-ui.panel plain>
     <div class="flex flex-wrap items-center justify-between gap-3">
         <x-ui.section-heading eyebrow="Manajemen User" title="Daftar Pengguna AGPIM" />
-        <span class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">{{ $users->count() }} user</span>
+        <span class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">{{ $users->count() }} user</span>
     </div>
 
-    <div class="mt-5 overflow-x-auto rounded-[1.5rem] border border-slate-200 bg-white md:mt-6">
+    <div class="mt-5 overflow-x-auto rounded-xl border border-slate-200 bg-white md:mt-6">
         <table class="min-w-full text-sm text-slate-700">
             <thead>
-                <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-[0.15em] text-slate-500">
+                <tr class="border-b border-slate-200 text-left text-xs text-slate-500">
                     <th class="px-4 py-3">Nama</th>
                     <th class="px-4 py-3">Email</th>
                     <th class="px-4 py-3">Role</th>

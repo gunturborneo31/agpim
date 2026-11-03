@@ -14,7 +14,7 @@
     };
 @endphp
 
-<x-ui.panel>
+<x-ui.panel plain>
     <x-ui.section-heading eyebrow="Edit Pengajuan" title="Perbarui data agenda" />
     <p class="mt-3 text-sm text-slate-600">Agenda masih berstatus diajukan, sehingga data dapat diperbarui sebelum diverifikasi.</p>
 
@@ -116,7 +116,7 @@
         </script>
 
         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Dokumen</p>
+            <p class="text-xs font-semibold text-slate-500">Dokumen</p>
             <div class="mt-3 grid gap-3 sm:grid-cols-2 md:gap-4">
                 <label class="form-field sm:col-span-2">
                     <span>Telaahan Staf Persetujuan Kegiatan (unggah ulang jika ingin ganti)</span>
@@ -139,7 +139,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+        <div class="rounded-2xl border border-blue-200 soft-blue p-4 text-sm text-blue-700">
             Simpan perubahan untuk memperbarui data pengajuan.
             <div class="mt-3 flex flex-wrap gap-3">
                 <button type="submit" class="btn-primary">Simpan Perubahan</button>

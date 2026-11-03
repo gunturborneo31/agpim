@@ -1,5 +1,6 @@
-@props(['padding' => 'p-5 md:p-7'])
+@props(['padding' => 'p-5 md:p-6', 'plain' => false])
 
-<section {{ $attributes->class(['card-panel', $padding]) }}>
+{{-- plain: pembungkus tingkat halaman, tanpa kotak, supaya tidak ada kartu di dalam kartu. --}}
+<section {{ $attributes->class($plain ? [] : ['card-panel', $padding]) }}>
     {{ $slot }}
 </section>

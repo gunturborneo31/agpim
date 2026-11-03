@@ -1,7 +1,7 @@
 @extends('layouts.app', ['title' => 'AGPIM • WhatsApp Blasting'])
 
 @section('content')
-<x-ui.panel>
+<x-ui.panel plain>
     <div class="flex flex-wrap items-center justify-between gap-3">
         <x-ui.section-heading eyebrow="Komunikasi" title="WhatsApp Blasting" />
         <div class="flex flex-wrap items-center gap-2">
@@ -9,18 +9,18 @@
                 <span class="material-symbols-outlined text-[18px] leading-none">apps</span>
                 Buka Panel Package
             </a>
-            <span class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">{{ $eligibleUsersCount }} penerima siap</span>
+            <span class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600">{{ $eligibleUsersCount }} penerima siap</span>
         </div>
     </div>
 
     @if ($errors->has('blast'))
-        <div class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div class="mt-4 rounded-2xl border border-rose-200 soft-red px-4 py-3 text-sm text-rose-700">
             {{ $errors->first('blast') }}
         </div>
     @endif
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
-        <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section class="rounded-3xl border border-slate-200 bg-white p-5">
             <h2 class="text-base font-semibold text-slate-900">Pengaturan Akun WA</h2>
             <p class="mt-1 text-sm text-slate-600">Atur backend aktif, sesi Web sidecar, dan ritme blast per penerima.</p>
 
@@ -64,7 +64,7 @@
                     <textarea name="message_footer" rows="2" class="w-full rounded-xl border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Contoh: Balas pesan ini jika butuh bantuan.">{{ old('message_footer', $settings->message_footer) }}</textarea>
                 </div>
 
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl grad-blue px-4 py-2 text-sm font-semibold text-white hover:brightness-105">
                     <span class="material-symbols-outlined text-[18px] leading-none">save</span>
                     Simpan Pengaturan WA
                 </button>
@@ -75,7 +75,7 @@
                 <div class="mt-3 grid gap-2 sm:grid-cols-2">
                     @foreach ($credentials as $label => $ready)
                         <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2">
-                            <span class="text-xs uppercase tracking-[0.1em] text-slate-500">{{ str_replace('_', ' ', $label) }}</span>
+                            <span class="text-xs text-slate-500">{{ str_replace('_', ' ', $label) }}</span>
                             <span class="text-xs font-semibold {{ $ready ? 'text-emerald-600' : 'text-rose-600' }}">{{ $ready ? 'Terisi' : 'Kosong' }}</span>
                         </div>
                     @endforeach
@@ -84,7 +84,7 @@
             </div>
         </section>
 
-        <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section class="rounded-3xl border border-slate-200 bg-white p-5">
             <h2 class="text-base font-semibold text-slate-900">Buat Blast Baru</h2>
             <p class="mt-1 text-sm text-slate-600">Kirim pengumuman massal ke user AGPIM yang punya nomor WhatsApp.</p>
 
@@ -129,13 +129,13 @@
                     </select>
                 </div>
 
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl grad-green px-4 py-2 text-sm font-semibold text-white hover:brightness-105">
                     <span class="material-symbols-outlined text-[18px] leading-none">send</span>
                     Jadwalkan Blast WA
                 </button>
             </form>
 
-            <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800">
+            <div class="mt-5 rounded-2xl border border-amber-200 soft-amber p-4 text-xs text-amber-800">
                 <p class="font-semibold">Operasional Queue</p>
                 <p class="mt-1">Jalankan worker: <span class="font-mono">php artisan queue:work</span></p>
                 <p class="mt-1">Status sidecar: <span class="font-mono">{{ $webStatusCommand }}</span></p>
@@ -144,13 +144,13 @@
         </section>
     </div>
 
-    <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
         <h2 class="text-base font-semibold text-slate-900">Riwayat Blast</h2>
 
         <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
             <table class="min-w-full text-sm text-slate-700">
                 <thead>
-                    <tr class="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-[0.12em] text-slate-500">
+                    <tr class="border-b border-slate-200 bg-slate-50 text-left text-xs text-slate-500">
                         <th class="px-4 py-3">Judul</th>
                         <th class="px-4 py-3">Target</th>
                         <th class="px-4 py-3">Backend</th>
@@ -166,7 +166,7 @@
                             <td class="px-4 py-3">{{ $blast->target === 'role' ? 'Role: '.$blast->target_role : 'Semua User' }}</td>
                             <td class="px-4 py-3 uppercase">{{ $blast->backend }}</td>
                             <td class="px-4 py-3">
-                                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $blast->status === 'completed' ? 'bg-emerald-100 text-emerald-700' : ($blast->status === 'failed' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700') }}">{{ strtoupper($blast->status) }}</span>
+                                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $blast->status === 'completed' ? 'soft-green text-emerald-700' : ($blast->status === 'failed' ? 'soft-red text-rose-700' : 'soft-amber text-amber-700') }}">{{ strtoupper($blast->status) }}</span>
                             </td>
                             <td class="px-4 py-3">{{ $blast->success_count }}/{{ $blast->total_recipients }} berhasil, {{ $blast->failed_count }} gagal</td>
                             <td class="px-4 py-3 text-xs text-slate-500">{{ $blast->created_at->translatedFormat('d M Y H:i') }}<br>{{ $blast->creator?->name ?? '-' }}</td>

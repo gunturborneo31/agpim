@@ -1,78 +1,96 @@
-@extends('layouts.app', ['title' => 'AGPIM • Landing'])
+@extends('layouts.app', ['title' => 'AGPIM • Agenda Pimpinan Mahakam Ulu'])
 
 @section('content')
-<div class="grid gap-4 md:gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-    <x-ui.panel>
-        <span class="badge-gold">Transformasi Digital Agenda Pimpinan</span>
-        <h2 class="mt-4 text-3xl font-bold leading-tight text-slate-900 md:mt-5 md:text-4xl">Dashboard agenda pimpinan yang cepat, sederhana, dan tetap siap saat jaringan tidak stabil.</h2>
-        <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">AGPIM menghubungkan OPD, Prokopim, Bupati, Wakil Bupati, dan Sekretaris Daerah dalam satu alur pengajuan undangan, verifikasi, disposisi, monitoring, tindak lanjut, dan dokumentasi kegiatan.</p>
-        <div class="mt-6 grid gap-3 sm:grid-cols-2 md:mt-8 md:gap-4 xl:grid-cols-4">
-            <x-ui.metric-card label="Total Agenda" :value="$stats['agendaCount']" />
-            <x-ui.metric-card label="Prioritas Tinggi" :value="$stats['highPriorityCount']" />
-            <x-ui.metric-card label="OPD Terdaftar" :value="$stats['opdCount']" />
-            <x-ui.metric-card label="Jenis Kegiatan" :value="$stats['typeCount']" />
-        </div>
-        <div class="mt-6 flex flex-wrap gap-3 md:mt-8">
-            <a href="{{ route('dashboard') }}" class="btn-primary">Lihat Dashboard</a>
-            <a href="{{ route('agendas.index') }}" class="btn-secondary">Lihat Blueprint Modul</a>
-        </div>
-    </x-ui.panel>
+@php
+    $features = [
+        ['icon' => 'space_dashboard', 'title' => 'Dashboard pimpinan', 'text' => 'Agenda hari ini, hitung mundur ke agenda berikutnya, prioritas tinggi, dan keputusan yang menunggu disposisi.'],
+        ['icon' => 'fact_check', 'title' => 'Verifikasi Prokopim', 'text' => 'Catatan verifikasi, riwayat perubahan status, peringatan jadwal bentrok, dan disposisi ke pejabat lain.'],
+        ['icon' => 'wifi_off', 'title' => 'Tetap jalan saat offline', 'text' => 'Halaman utama tersimpan di perangkat dan data tersinkron otomatis saat koneksi kembali.'],
+        ['icon' => 'folder_open', 'title' => 'Arsip & laporan', 'text' => 'Rekap agenda per bulan dan per OPD, serta riwayat kehadiran pimpinan.'],
+    ];
+@endphp
 
-    <x-ui.panel>
-        <x-ui.section-heading eyebrow="Workflow Pengajuan" />
-        <ol class="mt-5 space-y-3">
-            @foreach ($workflow as $key => $label)
-                <li class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700">{{ $loop->iteration }}</span>
-                    <div>
-                        <p class="font-semibold text-slate-900">{{ $label }}</p>
-                        <p class="text-xs text-slate-500">{{ str($key)->replace('_', ' ')->title() }}</p>
-                    </div>
-                </li>
+{{-- Pembuka --}}
+<section class="grid items-center gap-8 pt-2 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-12 lg:pt-6">
+    <div class="min-w-0">
+        <span class="badge-gold">Pemerintah Kabupaten Mahakam Ulu</span>
+        <h1 class="mt-4 text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl lg:text-[2.75rem]">
+            Dashboard agenda pimpinan yang cepat, sederhana, dan tetap siap saat jaringan tidak stabil.
+        </h1>
+        <p class="mt-4 max-w-[60ch] text-base leading-7 text-muted">
+            AGPIM menghubungkan OPD, Prokopim, Bupati, Wakil Bupati, dan Sekretaris Daerah dalam satu alur: pengajuan undangan, verifikasi, disposisi, monitoring, tindak lanjut, dan dokumentasi kegiatan.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-2.5">
+            @auth
+                <a href="{{ route('dashboard') }}" class="btn-primary">
+                    Buka dashboard
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </a>
+            @else
+                <a href="{{ route('login') }}" class="btn-primary">
+                    Masuk
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </a>
+                <a href="{{ route('public-proposals.create') }}" class="btn-secondary">Kirim usulan agenda</a>
+            @endauth
+        </div>
+    </div>
+
+    <div class="highlight-card p-5 sm:p-6">
+        <p class="text-sm text-muted">Data AGPIM saat ini</p>
+        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-5">
+            @foreach ([
+                ['Total agenda', $stats['agendaCount']],
+                ['Prioritas tinggi', $stats['highPriorityCount']],
+                ['OPD terdaftar', $stats['opdCount']],
+                ['Jenis kegiatan', $stats['typeCount']],
+            ] as [$label, $value])
+                <div>
+                    <dt class="text-[13px] text-muted">{{ $label }}</dt>
+                    <dd class="mt-0.5 font-mono text-3xl font-medium tracking-tight tabular">{{ $value }}</dd>
+                </div>
             @endforeach
-        </ol>
-    </x-ui.panel>
-</div>
+        </dl>
+    </div>
+</section>
 
-<section class="mt-4 grid gap-4 md:mt-6 md:gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-    <x-ui.panel>
-        <x-ui.section-heading eyebrow="Fokus Produk" />
-        <div class="mt-4 grid gap-4 sm:grid-cols-2">
-            <article class="feature-card">
-                <h3>Dashboard Pimpinan</h3>
-                <p>Timeline harian, countdown agenda berikutnya, kartu prioritas tinggi, keputusan menunggu disposisi, dan tab cepat hari ini hingga minggu ini.</p>
-            </article>
-            <article class="feature-card">
-                <h3>Verifikasi Prokopim</h3>
-                <p>Catatan verifikasi wajib, audit trail perubahan status, rekomendasi bentrok jadwal, dan disposisi ke pimpinan atau pejabat lain.</p>
-            </article>
-            <article class="feature-card">
-                <h3>PWA Offline</h3>
-                <p>Banner offline merah, cache halaman utama, service worker, IndexedDB/local snapshot, dan sinkronisasi otomatis saat koneksi kembali.</p>
-            </article>
-            <article class="feature-card">
-                <h3>Analitik & Arsip</h3>
-                <p>Agenda per bulan, per OPD, tingkat kehadiran pimpinan, dokumentasi foto/video/dokumen, serta pelaporan hasil kegiatan.</p>
-            </article>
-        </div>
-    </x-ui.panel>
+{{-- Alur --}}
+<section class="mt-14" aria-labelledby="workflow-heading">
+    <h2 id="workflow-heading" class="text-lg font-semibold">Alur pengajuan agenda</h2>
+    <p class="mt-1 text-sm text-muted">Status yang dilalui setiap undangan, dari draft OPD sampai selesai.</p>
+    <ol class="mt-5 grid gap-x-6 gap-y-4 border-t border-line pt-5 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach ($workflow as $key => $label)
+            <li class="flex gap-3">
+                <span class="font-mono text-[13px] text-muted tabular">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                <span class="text-sm font-medium">{{ $label }}</span>
+            </li>
+        @endforeach
+    </ol>
+</section>
 
-    <x-ui.panel>
-        <x-ui.section-heading eyebrow="Master Jenis Kegiatan" />
-        <div class="mt-4 flex flex-wrap gap-3">
-            @foreach ($agendaTypes as $agendaType)
-                <span class="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700">{{ $agendaType->name }}</span>
-            @endforeach
-        </div>
-        <div class="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <h3 class="text-lg font-semibold text-slate-900">Arsitektur siap produksi</h3>
-            <ul class="mt-4 space-y-3 text-sm text-slate-600">
-                <li>Laravel 12 + Blade + TailwindCSS + AlpineJS</li>
-                <li>Schema domain AGPIM: agenda, disposisi, dokumen, audit, notifikasi, snapshot sinkronisasi</li>
-                <li>Progressive Web App untuk akses jaringan terbatas</li>
-                <li>Role isolation: Super Admin, Prokopim, Bupati, Wakil Bupati, Sekda, OPD</li>
-            </ul>
-        </div>
-    </x-ui.panel>
+{{-- Fitur --}}
+<section class="mt-14" aria-labelledby="features-heading">
+    <h2 id="features-heading" class="text-lg font-semibold">Yang bisa dilakukan</h2>
+    <div class="mt-5 grid gap-x-8 gap-y-6 border-t border-line pt-5 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach ($features as $feature)
+            <article class="min-w-0">
+                <span class="flex h-9 w-9 items-center justify-center rounded-lg text-[#2f55d4] soft-blue">
+                    <span class="material-symbols-outlined text-[20px]">{{ $feature['icon'] }}</span>
+                </span>
+                <h3 class="mt-3 text-[15px] font-semibold">{{ $feature['title'] }}</h3>
+                <p class="mt-1 text-sm leading-6 text-muted">{{ $feature['text'] }}</p>
+            </article>
+        @endforeach
+    </div>
+</section>
+
+{{-- Jenis kegiatan --}}
+<section class="mt-14 mb-4" aria-labelledby="types-heading">
+    <h2 id="types-heading" class="text-lg font-semibold">Jenis kegiatan</h2>
+    <div class="mt-4 flex flex-wrap gap-2">
+        @foreach ($agendaTypes as $agendaType)
+            <span class="rounded-full px-3 py-1 text-sm text-[#2f4fbf] soft-blue">{{ $agendaType->name }}</span>
+        @endforeach
+    </div>
 </section>
 @endsection

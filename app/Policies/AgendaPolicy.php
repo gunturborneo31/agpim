@@ -29,7 +29,7 @@ class AgendaPolicy
 
     public function update(User $user, Agenda $agenda): bool
     {
-        if ($agenda->status !== 'submitted') {
+        if (! in_array($agenda->status, ['submitted', 'needs_revision'], true)) {
             return false;
         }
 

@@ -1,22 +1,31 @@
 @props([
     'time',
     'title',
-    'meta',
-    'priority',
-    'priorityLabel',
+    'meta' => null,
+    'href' => null,
+    'past' => false,
+    // Dipertahankan untuk pemakaian lama.
+    'priority' => null,
+    'priorityLabel' => null,
 ])
 
-<article class="bento-card border-l-4 border-l-blue-600 p-4 sm:p-5 md:p-6">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-        <div class="min-w-0 text-base font-bold text-slate-800 sm:min-w-[74px] sm:text-lg">{{ $time }}</div>
-        <div class="w-full">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                    <h4 class="text-base font-bold text-slate-900 sm:text-lg">{{ $title }}</h4>
-                    <p class="text-sm text-slate-600">{{ $meta }}</p>
-                </div>
-                <span class="priority-chip priority-{{ $priority }}">{{ $priorityLabel }}</span>
-            </div>
-        </div>
+<article {{ $attributes->class(['agenda-row', 'opacity-55' => $past]) }}>
+    <time class="tabular">{{ $time }}</time>
+    <div class="min-w-0">
+        @if ($href)
+            <a href="{{ $href }}" class="font-medium text-ink hover:text-[#2f55d4]">{{ $title }}</a>
+        @else
+            <p class="font-medium text-ink">{{ $title }}</p>
+        @endif
+        @if ($meta)
+            <p class="mt-0.5 text-[13px] text-muted">{{ $meta }}</p>
+        @endif
+    </div>
+    <div class="col-start-2 flex flex-wrap items-center gap-1.5 sm:col-start-auto sm:justify-end">
+        @if (trim($slot) !== '')
+            {{ $slot }}
+        @elseif ($priority && $priorityLabel)
+            <span class="priority-chip priority-{{ $priority }}">{{ $priorityLabel }}</span>
+        @endif
     </div>
 </article>
